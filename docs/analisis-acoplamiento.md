@@ -56,3 +56,23 @@ Una separación clara de responsabilidades y una comunicación basada en contrat
 El servicio de inventario debe ofrecer una interfaz clara para consultar y gestionar la disponibilidad de entradas, facilitando su integración con el proceso de compra.
 
 Las dependencias definitivas deben confirmarse mediante la revisión del código y de la arquitectura implementada en el proyecto.
+
+## Matriz de Propiedad de Datos
+
+La siguiente matriz identifica qué microservicio es propietario de cada colección o estructura de datos, qué servicio puede modificarla y cómo pueden acceder a ella los demás servicios. Cada microservicio debe gestionar sus propios datos y evitar el acceso directo a las bases de datos de otros servicios.
+
+| Dato / Colección | Microservicio Propietario | Modificación | Lectura |
+|---|---|---|---|
+| Usuarios (MongoDB) | User Service | Exclusiva del User Service | A través de la API del User Service |
+| Inventario (MongoDB) | Inventory Service | Exclusiva del Inventory Service | A través de la API del Inventory Service |
+| Locks (Redis) | Checkout Service | Exclusiva del Checkout Service | Uso interno del Checkout Service; otros servicios no acceden directamente a los locks |
+
+### Reglas de propiedad de datos
+
+- **User Service:** es responsable de administrar los datos de los usuarios.
+- **Inventory Service:** es responsable de administrar las entradas disponibles y su inventario.
+- **Checkout Service:** es responsable de gestionar los locks temporales utilizados durante el proceso de compra.
+- Los demás microservicios deben consultar los datos mediante las API del servicio propietario, en lugar de acceder directamente a sus bases de datos.
+- La comunicación entre servicios debe respetar la propiedad de los datos y reducir el acoplamiento entre componentes.
+
+**Nota:** La matriz describe la arquitectura prevista. Las rutas de API y los mecanismos de persistencia deben coincidir con la implementación real del proyecto.
