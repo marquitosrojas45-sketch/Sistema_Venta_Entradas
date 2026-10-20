@@ -70,3 +70,10 @@ Si la configuración es correcta, la consola mostrará (a través de Winston) la
 2. Preparar dos pestañas idénticas en Postman apuntando a `POST https://localhost:3443/api/comprar`.
 3. Ejecutar ambas peticiones simultáneamente (con menos de 3 segundos de diferencia).
 4. La primera petición devolverá `200 OK` (compra exitosa). La segunda petición detectará el lock de Memurai/Redis y devolverá `409 Conflict` (Recurso bloqueado). El stock final en la base de datos quedará en `0`, sin números negativos.
+
+## Matriz de Arquitectura - TP6
+| Microservicio | Responsabilidad | Endpoints | Datos propios | Dependencias |
+| :--- | :--- | :--- | :--- | :--- |
+| **User Service** | Gestión de identidad | `/api/usuarios` (CRUD) | BD `usuarios` | Ninguna |
+| **Inventory Service** | Catálogo y stock | `/api/inventario/reducir` (PUT) | BD `inventarios` | Ninguna |
+| **Checkout Service** | Transacciones y concurrencia | `/api/comprar` (POST) | `Locks` (Redis) | Inventory Service (HTTP) |
