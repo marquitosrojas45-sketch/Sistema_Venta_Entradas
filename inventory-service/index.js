@@ -7,7 +7,10 @@ app.use(express.json());
 
 // Verificar que el servicio esté funcionando
 app.get('/health', (req, res) => {
-  res.json({ status: 'Inventory Service is running' });
+  res.status(200).json({
+    service: 'inventory-service',
+    status: 'ok'
+  });
 });
 
 // Consultar las entradas del inventario
