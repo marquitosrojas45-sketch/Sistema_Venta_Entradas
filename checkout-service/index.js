@@ -9,28 +9,17 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 app.use(express.json());
 
-// 1. CONEXIÓN A REDIS (Conservado del TP3)
 const redisClient = createClient({ url: process.env.REDIS_URL || 'redis://127.0.0.1:6379' });
 redisClient.on('error', (err) => logger.error('Error en Redis', { error: err.message }));
 redisClient.connect()
-    .then(() => logger.info('Conectado a Redis/Memurai exitosamente'))
+    .then(() => logger.info('Checkout Service conectado a Redis exitosamente'))
     .catch(err => logger.error('Error al conectar Redis', { error: err.message }));
 
-// 2. DOCUMENTACIÓN SWAGGER (Adaptado del TP3 solo para compras)
 const swaggerDocument = {
     openapi: '3.0.0',
-    info: { 
-        title: 'API Checkout Service - TP6', 
-        version: '1.0.0', 
-        description: 'Microservicio de compras con Redis y comunicación HTTP' 
-    },
+    info: { title: 'API Checkout Service - TP6', version: '1.0.0' },
     paths: {
-        '/health': {
-            get: {
-                summary: 'Estado de salud del servicio',
-                responses: { '200': { description: 'OK' } }
-            }
-        },
+        '/health': { get: { summary: 'Estado de salud', responses: { '200': { description: 'OK' } } } },
         '/api/comprar': {
             post: { 
                 summary: 'Simula una compra concurrente protegida por Redis', 
@@ -44,19 +33,16 @@ const swaggerDocument = {
         }
     }
 };
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.get('/swagger.json', (req, res) => res.json(swaggerDocument)); 
 
-// 3. ENDPOINT HEALTHCHECK (Exigido en TP6)
 app.get('/health', (req, res) => {
     res.status(200).json({ service: 'checkout-service', status: 'ok' });
 });
 
-// 4. CONCURRENCIA + LLAMADA HTTP A INVENTARIO
 app.post('/api/comprar', async (req, res) => {
     const producto = req.body.producto || "Entrada Conferencia";
-    const lockKey = `lock:producto:Entrada_Conferencia`; 
+    const lockKey = `lock:producto:${producto.replace(/\s+/g, '_')}`; 
     const ownerId = crypto.randomUUID(); 
     const TTL = 5000; 
 
@@ -69,7 +55,6 @@ app.post('/api/comprar', async (req, res) => {
 
         await new Promise(resolve => setTimeout(resolve, 3000)); 
 
-        // Comunicación HTTP con Inventory Service con Timeout de 3s
         const inventoryUrl = process.env.INVENTORY_SERVICE_URL || 'http://localhost:3001';
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -85,17 +70,17 @@ app.post('/api/comprar', async (req, res) => {
         if (response.ok) {
             const data = await response.json();
             logger.info('Compra procesada exitosamente', { stockRestante: data.stockRestante });
-            res.status(200).json({ mensaje: "Compra exitosa", stockRestante: data.stockRestante });
+            return res.status(200).json({ mensaje: "Compra exitosa", stockRestante: data.stockRestante });
         } else if (response.status === 400) {
             logger.warn('Compra fallida: Stock insuficiente');
-            res.status(400).json({ error: "Stock insuficiente" });
+            return res.status(400).json({ error: "Stock insuficiente" });
         } else {
             logger.error('Error desde Inventory Service', { status: response.status });
-            res.status(503).json({ error: "Servicio de inventario temporalmente no disponible" });
+            return res.status(503).json({ error: "Servicio de inventario devolvió un error" });
         }
     } catch (error) {
-        logger.error('Error en proceso de compra / Timeout', { error: error.message });
-        res.status(503).json({ error: "Fallo de comunicación con Inventario o Timeout" });
+        logger.error('Fallo de comunicación o Timeout', { error: error.message });
+        return res.status(503).json({ error: "Fallo de comunicación con Inventario o Timeout" });
     } finally {
         const scriptLiberacion = `if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end`;
         await redisClient.eval(scriptLiberacion, { keys: [lockKey], arguments: [ownerId] });
@@ -103,5 +88,5 @@ app.post('/api/comprar', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    logger.info(`Checkout Service iniciado en http://localhost:${PORT}`);
+    logger.info(`Checkout Service iniciado en el puerto ${PORT}`);
 });
