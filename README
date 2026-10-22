@@ -79,3 +79,9 @@ Si la configuración es correcta, la consola mostrará (a través de Winston) la
 4. `checkout-service` aborta la petición a los 3000ms debido a su configuración de *Timeout*, libera el lock en Redis y responde con un `HTTP 503 Service Unavailable` al cliente.
 
 **Consecuencia e Inconsistencia:** Se genera un fallo parcial distribuido. El stock fue descontado realmente en la base de datos de inventario, pero el cliente recibió un error indicando fallo de comunicación. El bloqueo en Redis se liberó correctamente (garantizando que el sistema no se congele), pero los datos quedaron desfasados. Para mitigar esto en futuras iteraciones, se requeriría implementar un patrón Saga (transacciones compensatorias) o el uso de colas de mensajes (RabbitMQ/Kafka) para asegurar la consistencia eventual.
+## Matriz de Arquitectura - TP6
+| Microservicio | Responsabilidad | Endpoints | Datos propios | Dependencias |
+| :--- | :--- | :--- | :--- | :--- |
+| **User Service** | Gestión de identidad | `/api/usuarios` (CRUD) | BD `usuarios` | Ninguna |
+| **Inventory Service** | Catálogo y stock | `/api/inventario/reducir` (PUT) | BD `inventarios` | Ninguna |
+| **Checkout Service** | Transacciones y concurrencia | `/api/comprar` (POST) | `Locks` (Redis) | Inventory Service (HTTP) |
