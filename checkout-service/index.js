@@ -1,15 +1,4 @@
-<<<<<<< HEAD
 require('dotenv').config();
-=======
-            post: {
-                summary: 'Simula una compra concurrente protegida por Redis',
-                responses: {
-                    '200': { description: 'Compra exitosa' },
-                    '400': { description: 'Stock insuficiente' },
-                    '409': { description: 'Recurso bloqueado por otra transacción' },
-                    '503': { description: 'Servicio de inventario no disponible' }
-                }require('dotenv').config();
->>>>>>> 0a04adadd9ebd4101de841dd48ad9b5eeb428a1c
 const express = require('express');
 const crypto = require('crypto');
 const { createClient } = require('redis');
@@ -32,7 +21,6 @@ const swaggerDocument = {
     paths: {
         '/health': { get: { summary: 'Estado de salud', responses: { '200': { description: 'OK' } } } },
         '/api/comprar': {
-<<<<<<< HEAD
             post: { 
                 summary: 'Simula una compra concurrente protegida por Redis', 
                 responses: { 
@@ -41,26 +29,12 @@ const swaggerDocument = {
                     '409': { description: 'Recurso bloqueado por otra transacción' },
                     '503': { description: 'Servicio de inventario no disponible' }
                 } 
-=======
-            post: {
-                summary: 'Simula una compra concurrente protegida por Redis',
-                responses: {
-                    '200': { description: 'Compra exitosa' },
-                    '400': { description: 'Stock insuficiente' },
-                    '409': { description: 'Recurso bloqueado por otra transacción' },
-                    '503': { description: 'Servicio de inventario no disponible' }
-                }
->>>>>>> 0a04adadd9ebd4101de841dd48ad9b5eeb428a1c
             }
         }
     }
 };
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-<<<<<<< HEAD
 app.get('/swagger.json', (req, res) => res.json(swaggerDocument)); 
-=======
-app.get('/swagger.json', (req, res) => res.json(swaggerDocument));
->>>>>>> 0a04adadd9ebd4101de841dd48ad9b5eeb428a1c
 
 app.get('/health', (req, res) => {
     res.status(200).json({ service: 'checkout-service', status: 'ok' });
@@ -68,15 +42,9 @@ app.get('/health', (req, res) => {
 
 app.post('/api/comprar', async (req, res) => {
     const producto = req.body.producto || "Entrada Conferencia";
-<<<<<<< HEAD
     const lockKey = `lock:producto:${producto.replace(/\s+/g, '_')}`; 
     const ownerId = crypto.randomUUID(); 
     const TTL = 5000; 
-=======
-    const lockKey = `lock:producto:${producto.replace(/\s+/g, '_')}`;
-    const ownerId = crypto.randomUUID();
-    const TTL = 5000;
->>>>>>> 0a04adadd9ebd4101de841dd48ad9b5eeb428a1c
 
     try {
         const lockAdquirido = await redisClient.set(lockKey, ownerId, { NX: true, PX: TTL });
@@ -84,14 +52,6 @@ app.post('/api/comprar', async (req, res) => {
             logger.warn('Intento de compra rechazado: Recurso bloqueado');
             return res.status(409).json({ error: "El recurso está bloqueado." });
         }
-
-<<<<<<< HEAD
-        await new Promise(resolve => setTimeout(resolve, 3000)); 
-=======
-    const lockKey = `lock:producto:${producto.replace(/\s+/g, '_')}`;
-    const ownerId = crypto.randomUUID();
-    const TTL = 5000;
->>>>>>> 0a04adadd9ebd4101de841dd48ad9b5eeb428a1c
 
         const inventoryUrl = process.env.INVENTORY_SERVICE_URL || 'http://localhost:3001';
         const controller = new AbortController();
