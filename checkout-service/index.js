@@ -21,20 +21,20 @@ const swaggerDocument = {
     paths: {
         '/health': { get: { summary: 'Estado de salud', responses: { '200': { description: 'OK' } } } },
         '/api/comprar': {
-            post: {
-                summary: 'Simula una compra concurrente protegida por Redis',
-                responses: {
-                    '200': { description: 'Compra exitosa' },
-                    '400': { description: 'Stock insuficiente' },
+            post: { 
+                summary: 'Simula una compra concurrente protegida por Redis', 
+                responses: { 
+                    '200': { description: 'Compra exitosa' }, 
+                    '400': { description: 'Stock insuficiente' }, 
                     '409': { description: 'Recurso bloqueado por otra transacción' },
                     '503': { description: 'Servicio de inventario no disponible' }
-                }
+                } 
             }
         }
     }
 };
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.get('/swagger.json', (req, res) => res.json(swaggerDocument));
+app.get('/swagger.json', (req, res) => res.json(swaggerDocument)); 
 
 app.get('/health', (req, res) => {
     res.status(200).json({ service: 'checkout-service', status: 'ok' });
@@ -42,9 +42,9 @@ app.get('/health', (req, res) => {
 
 app.post('/api/comprar', async (req, res) => {
     const producto = req.body.producto || "Entrada Conferencia";
-    const lockKey = `lock:producto:${producto.replace(/\s+/g, '_')}`;
-    const ownerId = crypto.randomUUID();
-    const TTL = 5000;
+    const lockKey = `lock:producto:${producto.replace(/\s+/g, '_')}`; 
+    const ownerId = crypto.randomUUID(); 
+    const TTL = 5000; 
 
     try {
         const lockAdquirido = await redisClient.set(lockKey, ownerId, { NX: true, PX: TTL });
