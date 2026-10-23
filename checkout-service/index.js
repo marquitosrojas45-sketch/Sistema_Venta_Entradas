@@ -1,4 +1,11 @@
-require('dotenv').config();
+            post: {
+                summary: 'Simula una compra concurrente protegida por Redis',
+                responses: {
+                    '200': { description: 'Compra exitosa' },
+                    '400': { description: 'Stock insuficiente' },
+                    '409': { description: 'Recurso bloqueado por otra transacción' },
+                    '503': { description: 'Servicio de inventario no disponible' }
+                }require('dotenv').config();
 const express = require('express');
 const crypto = require('crypto');
 const { createClient } = require('redis');
@@ -53,7 +60,9 @@ app.post('/api/comprar', async (req, res) => {
             return res.status(409).json({ error: "El recurso está bloqueado." });
         }
 
-        await new Promise(resolve => setTimeout(resolve, 3000));
+    const lockKey = `lock:producto:${producto.replace(/\s+/g, '_')}`;
+    const ownerId = crypto.randomUUID();
+    const TTL = 5000;
 
         const inventoryUrl = process.env.INVENTORY_SERVICE_URL || 'http://localhost:3001';
         const controller = new AbortController();
