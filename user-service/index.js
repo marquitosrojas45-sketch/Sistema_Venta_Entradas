@@ -176,7 +176,7 @@ app.post('/auth/register', async (req, res) => {
         }
 
         const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-        const rolAsignado = (role === 'ADMIN') ? 'ADMIN' : 'USER';
+        const rolAsignado = 'USER';
 
         const nuevoUsuario = await Usuario.create({
             nombre,

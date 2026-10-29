@@ -9,6 +9,7 @@
   "dependencies": {
     "dotenv": "^18.0.9",
     "express": "^4.22.3",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.11.3",
     "swagger-ui-express": "^5.0.1",
     "winston": "^3.19.0"
