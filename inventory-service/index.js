@@ -1,16 +1,28 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const swaggerUi = require('swagger-ui-express');
 const logger = require('./logger');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const MONGODB_URI =
-    process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tp6_inventario';
+const JWT_SECRET = process.env.JWT_SECRET || 'clave_secreta_desarrollo_tp7';
 
 app.use(express.json());
+
+mongoose.connect(
+    process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tp6_inventario'
+)
+    .then(() => {
+        logger.info('[inventory-service] Conectado a MongoDB exitosamente');
+    })
+    .catch(error => {
+        logger.error('[inventory-service] Error conectando a MongoDB', {
+            error: error.message
+        });
+    });
 
 const inventarioSchema = new mongoose.Schema({
     producto: {
@@ -28,52 +40,156 @@ const inventarioSchema = new mongoose.Schema({
 
 const Inventario = mongoose.model('Inventario', inventarioSchema);
 
+async function inicializarInventario() {
+    try {
+        const existe = await Inventario.findOne({
+            producto: 'Entrada Conferencia'
+        });
+
+        if (!existe) {
+            await Inventario.create({
+                producto: 'Entrada Conferencia',
+                stock: 5
+            });
+
+            logger.info('[inventory-service] Inventario inicial creado');
+        }
+    } catch (error) {
+        logger.error('[inventory-service] Error al inicializar inventario', {
+            error: error.message
+        });
+    }
+}
+
+// Middleware de autenticación JWT
+function autenticarJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        logger.warn('[inventory-service] Petición rechazada: token ausente');
+
+        return res.status(401).json({
+            error: 'Token de autenticación requerido'
+        });
+    }
+
+    const token = authHeader.slice(7);
+
+    try {
+        const payload = jwt.verify(token, JWT_SECRET, {
+            algorithms: ['HS256']
+        });
+
+        req.user = payload;
+        req.rawToken = token;
+
+        next();
+    } catch (error) {
+        logger.warn('[inventory-service] Token inválido o vencido', {
+            motivo: error.message
+        });
+
+        return res.status(401).json({
+            error: 'Token inválido o expirado'
+        });
+    }
+}
+
+// Middleware de autorización por rol
+function autorizarRoles(...rolesPermitidos) {
+    return (req, res, next) => {
+        if (!req.user || !rolesPermitidos.includes(req.user.role)) {
+            logger.warn('[inventory-service] Acceso denegado por rol', {
+                userId: req.user?.sub,
+                rolActual: req.user?.role,
+                rolesRequeridos: rolesPermitidos
+            });
+
+            return res.status(403).json({
+                error: 'No tiene permisos suficientes'
+            });
+        }
+
+        next();
+    };
+}
+
+// Documentación Swagger
 const swaggerDocument = {
     openapi: '3.0.0',
     info: {
-        title: 'API Inventory Service - TP6',
-        version: '1.0.0'
+        title: 'API Inventory Service - TP7',
+        version: '2.0.0'
+    },
+    components: {
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT'
+            }
+        }
     },
     paths: {
         '/health': {
             get: {
-                summary: 'Verificar el estado del servicio',
+                summary: 'Estado de salud (público)',
                 responses: {
-                    '200': { description: 'Servicio funcionando' },
-                    '503': { description: 'Base de datos no disponible' }
+                    '200': { description: 'Servicio disponible' }
                 }
             }
         },
         '/api/inventario': {
             get: {
-                summary: 'Consultar el inventario',
+                summary: 'Consulta catálogo y stock (público)',
                 responses: {
-                    '200': { description: 'Inventario consultado correctamente' },
-                    '503': { description: 'Error al consultar el inventario' }
+                    '200': { description: 'Inventario consultado' }
                 }
             }
         },
-        '/api/inventario/reducir': {
-            put: {
-                summary: 'Descontar una entrada del inventario',
+        '/api/inventario/stock': {
+            post: {
+                summary: 'Agrega o actualiza stock (solo ADMIN)',
+                security: [{ bearerAuth: [] }],
                 requestBody: {
                     required: true,
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
-                                required: ['producto'],
+                                required: ['producto', 'stock'],
                                 properties: {
-                                    producto: { type: 'string', example: 'Entrada Conferencia' }
+                                    producto: {
+                                        type: 'string',
+                                        example: 'Entrada Conferencia'
+                                    },
+                                    stock: {
+                                        type: 'number',
+                                        example: 10
+                                    }
                                 }
                             }
                         }
                     }
                 },
                 responses: {
-                    '200': { description: 'Stock descontado correctamente' },
-                    '400': { description: 'Producto inválido o stock insuficiente' },
-                    '503': { description: 'Error al actualizar el inventario' }
+                    '200': { description: 'Stock actualizado' },
+                    '400': { description: 'Datos inválidos' },
+                    '401': { description: 'No autenticado' },
+                    '403': { description: 'Rol insuficiente' }
+                }
+            }
+        },
+        '/api/inventario/reducir': {
+            put: {
+                summary: 'Descuenta una unidad (USER o ADMIN autenticado)',
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    '200': { description: 'Stock descontado' },
+                    '400': { description: 'Stock insuficiente' },
+                    '401': { description: 'No autenticado' },
+                    '403': { description: 'Rol insuficiente' },
+                    '404': { description: 'Producto no encontrado' }
                 }
             }
         }
@@ -86,15 +202,8 @@ app.get('/swagger.json', (req, res) => {
     res.json(swaggerDocument);
 });
 
+// Rutas públicas
 app.get('/health', (req, res) => {
-    if (mongoose.connection.readyState !== 1) {
-        return res.status(503).json({
-            service: 'inventory-service',
-            status: 'unavailable',
-            database: 'disconnected'
-        });
-    }
-
     res.status(200).json({
         service: 'inventory-service',
         status: 'ok'
@@ -103,86 +212,133 @@ app.get('/health', (req, res) => {
 
 app.get('/api/inventario', async (req, res) => {
     try {
-        const productos = await Inventario.find().sort({ producto: 1 });
-        res.status(200).json(productos);
+        const items = await Inventario.find();
+        res.status(200).json(items);
     } catch (error) {
-        logger.error('Error al consultar inventario', { error: error.message });
-        res.status(503).json({ error: 'No se pudo consultar el inventario' });
-    }
-});
-
-app.put('/api/inventario/reducir', async (req, res) => {
-    const producto = req.body?.producto;
-
-    if (typeof producto !== 'string' || !producto.trim()) {
-        return res.status(400).json({
-            error: 'Debe indicar un producto válido'
-        });
-    }
-
-    try {
-        const actualizado = await Inventario.findOneAndUpdate(
-            { producto: producto.trim(), stock: { $gt: 0 } },
-            { $inc: { stock: -1 } },
-            { new: true, runValidators: true }
-        );
-
-        if (actualizado) {
-            logger.info('Stock descontado correctamente', {
-                producto: actualizado.producto,
-                stockRestante: actualizado.stock
-            });
-
-            return res.status(200).json({
-                mensaje: 'Stock descontado correctamente',
-                producto: actualizado.producto,
-                stockRestante: actualizado.stock
-            });
-        }
-
-        const existe = await Inventario.exists({ producto: producto.trim() });
-
-        if (!existe) {
-            return res.status(400).json({
-                error: 'Producto inexistente o stock insuficiente'
-            });
-        }
-
-        logger.warn('Compra rechazada: stock insuficiente', {
-            producto: producto.trim()
-        });
-
-        return res.status(400).json({ error: 'Stock insuficiente' });
-    } catch (error) {
-        logger.error('Error al reducir inventario', { error: error.message });
-        return res.status(503).json({
-            error: 'No se pudo actualizar el inventario'
-        });
-    }
-});
-
-async function startServer() {
-    try {
-        await mongoose.connect(MONGODB_URI);
-        logger.info('Conexión con MongoDB establecida');
-
-        await Inventario.updateOne(
-            { producto: 'Entrada Conferencia' },
-            { $setOnInsert: { producto: 'Entrada Conferencia', stock: 1 } },
-            { upsert: true }
-        );
-
-        logger.info('Inventario inicial verificado');
-
-        app.listen(PORT, () => {
-            logger.info(`Inventory Service escuchando en el puerto ${PORT}`);
-        });
-    } catch (error) {
-        logger.error('No se pudo iniciar Inventory Service', {
+        logger.error('[inventory-service] Error consultando inventario', {
             error: error.message
         });
-        process.exit(1);
-    }
-}
 
-startServer();
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// Solo ADMIN puede agregar o actualizar stock
+app.post(
+    '/api/inventario/stock',
+    autenticarJWT,
+    autorizarRoles('ADMIN'),
+    async (req, res) => {
+        try {
+            const { producto, stock } = req.body;
+
+            if (
+                typeof producto !== 'string' ||
+                !producto.trim() ||
+                typeof stock !== 'number' ||
+                !Number.isFinite(stock) ||
+                stock < 0
+            ) {
+                return res.status(400).json({
+                    error: 'Datos de producto o stock inválidos'
+                });
+            }
+
+            const item = await Inventario.findOneAndUpdate(
+                { producto: producto.trim() },
+                { $set: { stock } },
+                { new: true, upsert: true, runValidators: true }
+            );
+
+            logger.info('[inventory-service] Stock actualizado por ADMIN', {
+                adminId: req.user.sub,
+                producto: item.producto,
+                nuevoStock: item.stock
+            });
+
+            res.status(200).json({
+                mensaje: 'Stock actualizado correctamente',
+                inventario: item
+            });
+        } catch (error) {
+            logger.error('[inventory-service] Error actualizando stock', {
+                error: error.message
+            });
+
+            res.status(500).json({
+                error: 'Error interno del servidor'
+            });
+        }
+    }
+);
+
+// Requiere JWT válido y rol USER o ADMIN
+app.put(
+    '/api/inventario/reducir',
+    autenticarJWT,
+    autorizarRoles('USER', 'ADMIN'),
+    async (req, res) => {
+        try {
+            const nombreProd =
+                typeof req.body.producto === 'string' &&
+                req.body.producto.trim()
+                    ? req.body.producto.trim()
+                    : 'Entrada Conferencia';
+
+            const item = await Inventario.findOneAndUpdate(
+                {
+                    producto: nombreProd,
+                    stock: { $gt: 0 }
+                },
+                { $inc: { stock: -1 } },
+                { new: true, runValidators: true }
+            );
+
+            if (item) {
+                logger.info('[inventory-service] Stock descontado', {
+                    userId: req.user.sub,
+                    role: req.user.role,
+                    stockRestante: item.stock
+                });
+
+                return res.status(200).json({
+                    mensaje: 'Stock reducido',
+                    stockRestante: item.stock,
+                    usuarioAutenticado: req.user.sub
+                });
+            }
+
+            const existe = await Inventario.exists({
+                producto: nombreProd
+            });
+
+            if (!existe) {
+                return res.status(404).json({
+                    error: 'Producto no encontrado'
+                });
+            }
+
+            logger.warn('[inventory-service] Stock insuficiente', {
+                userId: req.user.sub
+            });
+
+            return res.status(400).json({
+                error: 'Stock insuficiente'
+            });
+        } catch (error) {
+            logger.error('[inventory-service] Error al reducir stock', {
+                error: error.message
+            });
+
+            res.status(500).json({
+                error: 'Error interno del servidor'
+            });
+        }
+    }
+);
+
+app.listen(PORT, () => {
+    logger.info(`[inventory-service] Iniciado en el puerto ${PORT}`);
+});
+
+inicializarInventario();
