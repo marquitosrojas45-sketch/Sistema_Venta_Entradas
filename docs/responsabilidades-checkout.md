@@ -1,33 +1,13 @@
-# Ficha Técnica y Responsabilidades: Checkout Service
+# Ficha de Definición: Checkout Service (TP5 - Sección 8.1)
 
-## 1. Misión del Microservicio
-Orquestar transaccionalmente el proceso de compra de entradas a eventos, actuando como fachada segura y desacoplada entre el cliente final y los servicios de dominio interno.
-
-## 2. Límites de Dominio y Responsabilidades
-* **Orquestación de Compras:** Coordina la secuencia de validaciones requeridas para procesar una compra de entradas.
-* **Propagación del Contexto de Identidad:** Recibe el token JWT provisto por el cliente, valida su autenticidad y rol, y lo propaga en las cabeceras HTTP hacia los servicios internos involucrados.
-* **Aislamiento de Concurrencia:** **No posee ni administra datos de stock ni mecanismos de bloqueo de bajo nivel (Redis).** Delega íntegramente la validación y decremento de existencias a `inventory-service`.
-* **Resiliencia y Manejo de Fallos:** Aplica políticas de *timeout* (3000ms) ante peticiones hacia otros microservicios y gestiona respuestas de conflicto o indisponibilidad para proteger al sistema frente a cascadas de fallos.
-
-## 3. Reglas de Negocio
-1. Solo usuarios autenticados con rol `USER` o `ADMIN` pueden iniciar compras.
-2. Toda compra debe especificar un producto válido (por defecto `"Entrada Conferencia"` si no se envía cuerpo).
-3. La llamada a `inventory-service` debe propagar el mismo encabezado `Authorization: Bearer <token>` recibido del cliente.
-4. Si la llamada a `inventory-service` demora más de 3000ms, la petición se cancela automáticamente (*AbortSignal*) y se responde `HTTP 503 Service Unavailable`.
-5. Si `inventory-service` responde `HTTP 409 Conflict` (producto temporalmente bloqueado por concurrencia), `checkout-service` transmite dicho estado al cliente para que pueda reintentar.
-
-## 4. Datos Propios Administrados
-* **Microservicio Stateless:** No mantiene almacenamiento persistente propio en esta fase. No accede a MongoDB ni a Redis directamente. Toda persistencia de existencias corresponde a `inventory-service`.
-
-## 5. Acoplamiento y Dependencias
-* **Acoplamiento Eferente (Hacia afuera):**
-  * Dependencia sincrónica vía HTTP/REST con `inventory-service` (`INVENTORY_SERVICE_URL:3001`).
-* **Acoplamiento Aferente (Hacia adentro):**
-  * Consumido por clientes externos (aplicaciones cliente, web, Swagger) a través del endpoint `POST /api/comprar`.
-
-## 6. Endpoints Expuestos
-
-| Método | Endpoint | Nivel de Acceso | Descripción | Códigos HTTP |
-| :---: | :--- | :--- | :--- | :--- |
-| `GET` | `/health` | Público | Comprueba la disponibilidad del microservicio. | `200` |
-| `POST` | `/api/comprar` | Autenticado (`USER`, `ADMIN`) | Procesa la compra delegando la reducción de stock a `inventory-service`. | `200`, `400`, `401`, `403`, `404`, `409`, `503` |
+| Elemento | Definición |
+| :--- | :--- |
+| **1. Nombre** | **Checkout & Transaction Service (`checkout-service`)** |
+| **2. Responsabilidad principal** | Orquestación transaccional del proceso de compra de entradas, actuando como fachada segura y desacoplada entre el cliente final y los servicios de dominio interno. |
+| **3. Operaciones** | - Recepción de intenciones de compra de clientes autenticados.<br>- Validación criptográfica de la identidad del comprador y rol permitido (`USER`/`ADMIN`).<br>- Delegación de la reducción de existencias hacia `inventory-service` propagando el contexto de seguridad JWT.<br>- Tratamiento semántico de respuestas y manejo de resiliencia ante fallos parciales o indisponibilidad temporal. |
+| **4. Reglas de negocio** | - Toda compra exige un usuario autenticado con rol `USER` o `ADMIN`.<br>- Se propaga íntegramente el encabezado `Authorization: Bearer <token>` hacia la llamada interna con `inventory-service`.<br>- Aplica un temporizador de *timeout* estricto de 3000ms en la invocación remota.<br>- Si `inventory-service` responde `409 Conflict`, propaga el conflicto al cliente para permitir un reintento.<br>- Si `inventory-service` responde `400 Bad Request`, informa stock insuficiente al comprador.<br>- Si `inventory-service` no responde o se agota el timeout, devuelve de forma controlada `HTTP 503 Service Unavailable` sin propagar un error 500 genérico. |
+| **5. Datos propios** | - **Microservicio Stateless:** No mantiene almacenamiento persistente en base de datos en esta etapa.<br>- **No accede a Redis ni a MongoDB:** La propiedad del stock y sus bloqueos reside exclusivamente en `inventory-service`. |
+| **6. Endpoints** | - `GET /health` (Público): Comprobación de estado del servicio.<br>- `POST /api/comprar` (Autenticado `USER`/`ADMIN`): Orquestación de compra con propagación de token a Inventario. |
+| **7. Dependencias** | - Dependencias de microservicios: `inventory-service` (`http://inventory-service:3001` vía HTTP REST interno).<br>- Dependencias de infraestructura: Ninguna (no requiere Redis ni MongoDB directamente). |
+| **8. Fuera de alcance** | - Gestión de contraseñas, hashing y emisión de tokens (propio de `user-service`).<br>- Persistencia directa de stock y manipulación de bloqueos en memoria (propio de `inventory-service`). |
+| **9. Justificación** | Permite desacoplar el flujo de compra del almacenamiento del stock. Al mantener a `checkout-service` como un orquestador ligero y sin estado, puede escalar horizontalmente ante picos masivos de compra mientras `inventory-service` preserva la integridad del recurso compartido. |
