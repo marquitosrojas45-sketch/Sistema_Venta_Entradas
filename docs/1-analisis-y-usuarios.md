@@ -1,13 +1,20 @@
-## Checklist de Validación de Límites
+# 1. Análisis de Dominio y Límites de Servicio: User Service
+
+## Checklist de Validación de Límites (DDD)
 
 - [x] **¿Cada servicio puede explicarse en una frase clara?**  
-  Sí. (*User Service* administra perfiles, autenticación y credenciales de usuario; *Checkout Service* gestiona compras y generación de entradas; *Catalog/Events Service* administra los eventos y stock disponible).
+  *User Service* administra de forma centralizada la identidad, el registro, la autenticación y las credenciales de los usuarios; *Inventory Service* administra el catálogo de entradas, el stock disponible y la exclusión mutua que lo protege; *Checkout Service* orquesta el flujo transaccional de compras.
 
 - [x] **¿Agrupan datos que cambian juntos?**  
-  Sí (por ejemplo, el módulo de usuarios gestiona únicamente credenciales y datos de perfil, mientras que el stock y la disponibilidad de entradas cambian de forma independiente en su respectivo servicio).
+  Sí: el ciclo de vida de los usuarios (altas, bajas, cambios de contraseña, roles) evoluciona con independencia de la disponibilidad o venta de entradas para los eventos.
 
 - [x] **¿Tienen bases de datos independientes?**  
-  Sí, cada microservicio gestiona sus colecciones/tablas lógicas y almacenamiento en memoria o caché (como Redis) de forma aislada, sin compartir acceso directo a bases de datos de otros servicios.
+  Sí: cada microservicio administra su propio esquema y motor de base de datos (`users-db` para usuarios, `inventory-db` e `inventory-redis` para inventario). Ningún servicio accede directamente al almacenamiento de otro.
 
 - [x] **¿Se comunican por red (APIs) en lugar de compartir código?**  
-  Sí, mediante peticiones HTTP/REST estructuradas y contratos de API bien definidos entre los microservicios.
+  Sí: mediante contratos REST sobre HTTP estandarizados y tokens de seguridad JWT autónomos.
+
+---
+
+## Dominio de Identidad
+El microservicio `user-service` es el único componente autorizado para consultar y persistir en la colección `usuarios`. Expone endpoints públicos para registro (`/auth/register`) y autenticación (`/auth/login`), y endpoints protegidos por RBAC para administración (`/api/usuarios`).

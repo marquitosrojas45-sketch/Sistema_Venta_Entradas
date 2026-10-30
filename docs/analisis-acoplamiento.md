@@ -1,78 +1,53 @@
-# Análisis de acoplamiento entre microservicios
+# Análisis de Acoplamiento y Matriz de Propiedad de Datos
 
 ## 1. Introducción
+El sistema de venta de entradas se encuentra descompuesto en tres microservicios autónomos (`user-service`, `inventory-service` y `checkout-service`). El diseño persigue minimizar el acoplamiento y maximizar la cohesión funcional dentro de cada contexto delimitado (*bounded context*).
 
-El sistema de venta de entradas está organizado en microservicios para separar responsabilidades y facilitar el mantenimiento y la evolución de la aplicación.
+---
 
-Entre los componentes identificados se encuentran `user-service`, `checkout-service` e `inventory-service`.
+## 2. Matriz de Propiedad de Datos y Persistencia
 
-## 2. Responsabilidades de los servicios
+Cada microservicio debe ser el único dueño de sus estructuras de datos y mecanismos de sincronización. Ningún componente debe acceder directamente a bases de datos o llaves de caché pertenecientes a otro servicio.
 
-- **User Service:** encargado de las funcionalidades relacionadas con los usuarios.
-- **Checkout Service:** destinado al proceso de compra de entradas.
-- **Inventory Service:** encargado de consultar y gestionar la disponibilidad de entradas.
+| Dato / Recurso | Microservicio Propietario | Motor de Almacenamiento | Modo de Acceso Externo | Justificación Arquitectónica |
+| :--- | :---: | :---: | :--- | :--- |
+| **Identidades y Perfiles de Usuario** | `user-service` | MongoDB (`tp6_usuarios`) | Exclusivamente a través de la API REST de `user-service` (`/auth/*`, `/api/usuarios/*`). | Protege contraseñas hasheadas (`bcrypt`) y datos personales sensibles. |
+| **Catálogo y Existencias de Stock** | `inventory-service` | MongoDB (`tp6_inventario`) | Exclusivamente a través de la API REST de `inventory-service` (`/api/inventario/*`). | Centraliza la regla de negocio de stock no negativo y consistencia de existencias. |
+| **Locks Distribuidos de Stock** | `inventory-service` | Redis (`inventory-redis`) | **Uso interno exclusivo de `inventory-service`**. | **Encapsulación de Concurrencia:** Inventory protege su propio dato. El resto de los servicios desconoce Redis. |
+| **Sesión y Contexto de Identidad** | *Descentralizado (Stateless)* | Tokens JWT (`HS256`) | Propagación mediante el encabezado HTTP estándar `Authorization: Bearer <token>`. | Evita que cada petición de compra requiera consultar sincrónicamente a `user-service`. |
 
-## 3. Análisis del acoplamiento
+---
 
-El objetivo de una arquitectura basada en microservicios es mantener un bajo acoplamiento entre sus componentes.
+## 3. Matriz de Acoplamiento Concreto
 
-Cada servicio debe tener una responsabilidad definida y evitar depender directamente de la implementación interna de los demás.
+Para evaluar la calidad arquitectónica, se analizan los distintos tipos de acoplamiento existentes entre los componentes:
 
-Se recomienda que la comunicación entre servicios se realice mediante interfaces bien definidas, como API REST, en lugar de acceder directamente al código o a los datos internos de otro servicio.
+| Relación | Tipo de Acoplamiento | Nivel | Justificación y Mecanismo |
+| :--- | :---: | :---: | :--- |
+| **Checkout Service -> Inventory Service** | **De Protocolo y Contrato** | Bajo | Se comunican mediante HTTP REST estándar con payloads JSON bien estructurados. Cambios internos en Inventory no afectan a Checkout mientras se mantenga el contrato. |
+| **Checkout Service -> Inventory Service** | **Temporal (Sincrónico)** | Medio | Al ser una llamada HTTP sincrónica bloqueante, Checkout requiere que Inventory esté disponible al momento de la compra. Se mitiga mediante un *timeout* estricto de 3000ms. |
+| **Checkout Service -> Redis** | **Inexistente (Desacoplado)** | Nulo | **Corrección aplicada:** Checkout ya no se conecta a Redis ni gestiona locks. La exclusión mutua fue completamente delegada a Inventory Service. |
+| **Checkout Service -> User Service** | **Inexistente en tiempo de ejecución** | Nulo | Checkout no consulta la base de datos de usuarios ni realiza llamadas HTTP a User Service; verifica la identidad de forma autónoma mediante la firma simétrica del token JWT. |
+| **Inventory Service -> User Service** | **Inexistente en tiempo de ejecución** | Nulo | Inventory valida el token propagado utilizando la clave secreta `JWT_SECRET` sin contactar a User Service. Si User Service cae, Inventory y Checkout continúan operando normalmente. |
 
-## 4. Posibles dependencias
+---
 
-Durante el proceso de compra, `checkout-service` podría necesitar consultar a `inventory-service` para verificar la disponibilidad de las entradas.
+## 4. Métricas de Acoplamiento: Aferente y Eferente
 
-Asimismo, puede necesitar información de `user-service` para asociar una compra con un usuario.
+* **Acoplamiento Aferente ($C_a$):** Número de componentes externos que dependen del servicio (indica responsabilidad).
+* **Acoplamiento Eferente ($C_e$):** Número de componentes externos de los que depende el servicio (indica fragilidad).
+* **Inestabilidad ($I = \frac{C_e}{C_a + C_e}$):** Valor entre 0 (máxima estabilidad) y 1 (máxima inestabilidad).
 
-Estas interacciones representan dependencias funcionales que deben definirse mediante contratos de comunicación claros.
+| Microservicio | $C_a$ (Aferente) | $C_e$ (Eferente) | Inestabilidad ($I$) | Rol Arquitectónico |
+| :--- | :---: | :---: | :---: | :--- |
+| **User Service** | 1 (Clientes HTTP) | 0 (No depende de nadie) | **0.00 (Totalmente Estable)** | Componente de infraestructura de identidad base. |
+| **Inventory Service** | 2 (Clientes HTTP, Checkout) | 0 (No depende de otros microservicios) | **0.00 (Totalmente Estable)** | Componente central de catálogo y stock. |
+| **Checkout Service** | 1 (Clientes HTTP) | 1 (`inventory-service`) | **0.50 (Equilibrado)** | Componente de orquestación transaccional. |
 
-**Nota:** estas dependencias describen las interacciones esperadas por las responsabilidades de los servicios. Deben verificarse con la implementación real del proyecto.
+---
 
-## 5. Riesgos de un acoplamiento elevado
-
-Un acoplamiento elevado puede provocar:
-
-- Cambios en un servicio que obliguen a modificar otros.
-- Mayor dificultad para probar los componentes de manera independiente.
-- Dependencia de la disponibilidad de otros servicios.
-- Mayor complejidad para mantener y desplegar el sistema.
-
-## 6. Recomendaciones
-
-1. Mantener responsabilidades independientes para cada microservicio.
-2. Definir endpoints y formatos de respuesta estables.
-3. Evitar compartir código interno innecesariamente entre servicios.
-4. Gestionar los errores y los tiempos de espera en las comunicaciones.
-5. Documentar las dependencias entre los servicios.
-6. Verificar la disponibilidad del inventario antes de confirmar una compra.
-7. Considerar mecanismos para evitar que dos compras asignen las mismas entradas.
-
-## 7. Conclusión
-
-Una separación clara de responsabilidades y una comunicación basada en contratos bien definidos ayudan a reducir el acoplamiento entre los microservicios.
-
-El servicio de inventario debe ofrecer una interfaz clara para consultar y gestionar la disponibilidad de entradas, facilitando su integración con el proceso de compra.
-
-Las dependencias definitivas deben confirmarse mediante la revisión del código y de la arquitectura implementada en el proyecto.
-
-## Matriz de Propiedad de Datos
-
-La siguiente matriz identifica qué microservicio es propietario de cada colección o estructura de datos, qué servicio puede modificarla y cómo pueden acceder a ella los demás servicios. Cada microservicio debe gestionar sus propios datos y evitar el acceso directo a las bases de datos de otros servicios.
-
-| Dato / Colección | Microservicio Propietario | Modificación | Lectura |
-|---|---|---|---|
-| Usuarios (MongoDB) | User Service | Exclusiva del User Service | A través de la API del User Service |
-| Inventario (MongoDB) | Inventory Service | Exclusiva del Inventory Service | A través de la API del Inventory Service |
-| Locks (Redis) | Checkout Service | Exclusiva del Checkout Service | Uso interno del Checkout Service; otros servicios no acceden directamente a los locks |
-
-### Reglas de propiedad de datos
-
-- **User Service:** es responsable de administrar los datos de los usuarios.
-- **Inventory Service:** es responsable de administrar las entradas disponibles y su inventario.
-- **Checkout Service:** es responsable de gestionar los locks temporales utilizados durante el proceso de compra.
-- Los demás microservicios deben consultar los datos mediante las API del servicio propietario, en lugar de acceder directamente a sus bases de datos.
-- La comunicación entre servicios debe respetar la propiedad de los datos y reducir el acoplamiento entre componentes.
-
-**Nota:** La matriz describe la arquitectura prevista. Las rutas de API y los mecanismos de persistencia deben coincidir con la implementación real del proyecto.
+## 5. Conclusión de las Mejoras de Acoplamiento
+Al transferir la propiedad del lock en Redis desde `checkout-service` hacia `inventory-service`:
+1. Se eliminó el acoplamiento de almacenamiento compartido entre Checkout e Inventory.
+2. Se evitó la fuga del modelo de concurrencia del stock hacia capas superiores.
+3. Se garantizó que cualquier nuevo consumidor del stock quedará protegido por la misma exclusión mutua de forma transparente.

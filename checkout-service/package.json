@@ -1,7 +1,7 @@
 {
   "name": "checkout-service",
   "version": "1.0.0",
-  "description": "Microservicio de compras para el TP6",
+  "description": "Microservicio de compras y orquestacion de transacciones",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -12,7 +12,6 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.3",
-    "redis": "^4.6.0",
     "swagger-ui-express": "^5.0.0",
     "winston": "^3.10.0"
   }

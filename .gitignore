@@ -1,4 +1,28 @@
+# Dependencias
 node_modules/
+
+# Variables de entorno y secretos
 .env
+.env.local
+.env.*.local
+
+# Certificados y llaves criptograficas (nunca versionar)
+*.pfx
+*.pem
+*.crt
+*.cer
+*.key
+
+# Logs y auditoria
+logs/
+*/logs/
 *.log
-certificado.pfx
+*.log.*
+*-audit.json
+.system_generated/
+
+# Archivos del sistema y del IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

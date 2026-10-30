@@ -1,68 +1,77 @@
 require('dotenv').config();
 const express = require('express');
-const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const { createClient } = require('redis');
 const swaggerUi = require('swagger-ui-express');
 const logger = require('./logger');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 const JWT_SECRET = process.env.JWT_SECRET || 'clave_secreta_desarrollo_tp7';
+const INVENTORY_SERVICE_URL = process.env.INVENTORY_SERVICE_URL || 'http://localhost:3001';
 
 app.use(express.json());
 
-const redisClient = createClient({ url: process.env.REDIS_URL || 'redis://127.0.0.1:6379' });
-redisClient.on('error', (err) => logger.error('[checkout-service] Error en Redis', { error: err.message }));
-redisClient.connect()
-    .then(() => logger.info('[checkout-service] Conectado a Redis exitosamente'))
-    .catch(err => logger.error('[checkout-service] Error al conectar Redis', { error: err.message }));
-
-// MIDDLEWARE DE AUTENTICACIÓN JWT (Sección 9 TP7)
+// ==========================================
+// 1. MIDDLEWARES DE AUTENTICACIÓN Y AUTORIZACIÓN JWT
+// ==========================================
 const autenticarJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        logger.warn('[checkout-service] Intento de compra sin token');
-        return res.status(401).json({ error: 'Token de autenticación ausente o mal formado' });
+        logger.warn('[checkout-service] Intento de compra sin token o formato invalido');
+        return res.status(401).json({ error: 'Token de autenticacion ausente o mal formado' });
     }
 
     const token = authHeader.split(' ')[1];
     try {
         const payload = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
         req.user = payload;
-        req.rawToken = token; // Guardamos para propagarlo a inventory-service
+        req.rawToken = token; // Se preserva el token para propagarlo al servicio interno
         next();
     } catch (error) {
-        logger.warn('[checkout-service] Token inválido o vencido', { motivo: error.message });
-        return res.status(401).json({ error: 'Token inválido o expirado' });
+        logger.warn('[checkout-service] Token invalido o vencido', { motivo: error.message });
+        return res.status(401).json({ error: 'Token invalido o expirado' });
     }
 };
 
-// MIDDLEWARE DE AUTORIZACIÓN POR ROL (Sección 11 TP7)
 const autorizarRoles = (...rolesPermitidos) => {
     return (req, res, next) => {
         if (!req.user || !rolesPermitidos.includes(req.user.role)) {
-            logger.warn('[checkout-service] Rol no autorizado para comprar', { userId: req.user?.sub, role: req.user?.role });
+            logger.warn('[checkout-service] Rol no autorizado para comprar', {
+                userId: req.user?.sub,
+                role: req.user?.role
+            });
             return res.status(403).json({ error: 'No tiene permisos para realizar compras' });
         }
         next();
     };
 };
 
-// SWAGGER CON ESQUEMA BEARER
+// ==========================================
+// 2. SWAGGER (OPENAPI 3.0)
+// ==========================================
 const swaggerDocument = {
     openapi: '3.0.0',
-    info: { title: 'API Checkout Service - TP7', version: '2.0.0' },
+    info: {
+        title: 'API Checkout Service - TP6 & TP7',
+        version: '3.0.0',
+        description: 'Orquestador del proceso de compra. Valida la identidad y delega la reduccion concurrente de stock a Inventory Service propagando el contexto de seguridad.'
+    },
     components: {
         securitySchemes: {
             bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }
         }
     },
     paths: {
-        '/health': { get: { summary: 'Estado de salud (Público)', responses: { '200': { description: 'OK' } } } },
+        '/health': {
+            get: {
+                summary: 'Estado de salud (Publico)',
+                responses: { '200': { description: 'Servicio disponible' } }
+            }
+        },
         '/api/comprar': {
             post: {
-                summary: 'Ejecuta una compra concurrente propagando el JWT a Inventario (USER o ADMIN)',
+                summary: 'Ejecuta una compra propagando el JWT a Inventory Service (USER o ADMIN)',
+                description: 'Verifica el token JWT del comprador y delega la operacion de reduccion de stock a Inventory Service (quien gestiona el lock de concurrencia y persistencia).',
                 security: [{ bearerAuth: [] }],
                 requestBody: {
                     required: false,
@@ -78,42 +87,38 @@ const swaggerDocument = {
                 responses: {
                     '200': { description: 'Compra exitosa' },
                     '400': { description: 'Stock insuficiente' },
-                    '401': { description: 'Token ausente, inválido o expirado' },
+                    '401': { description: 'Token ausente, invalido o expirado' },
                     '403': { description: 'Permisos insuficientes' },
-                    '409': { description: 'Recurso bloqueado por otra transacción' },
-                    '503': { description: 'Servicio de inventario no disponible' }
+                    '404': { description: 'Producto no encontrado' },
+                    '409': { description: 'Recurso bloqueado por concurrencia en Inventario' },
+                    '503': { description: 'Servicio de inventario no disponible o Timeout' }
                 }
             }
         }
     }
 };
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.get('/swagger.json', (req, res) => res.json(swaggerDocument));
 
+// ==========================================
+// 3. ENDPOINTS
+// ==========================================
 app.get('/health', (req, res) => {
     res.status(200).json({ service: 'checkout-service', status: 'ok' });
 });
 
-// ENDPOINT PROTEGIDO CON PROPAGACIÓN DE TOKEN (Sección 13 TP7)
+// Proceso de Compra:
+// Checkout Service orquesta la transaccion pero delega la concurrencia a Inventory Service (duenio del dato)
 app.post('/api/comprar', autenticarJWT, autorizarRoles('USER', 'ADMIN'), async (req, res) => {
-    const producto = req.body.producto || "Entrada Conferencia";
-    const lockKey = `lock:producto:${producto.replace(/\s+/g, '_')}`;
-    const ownerId = crypto.randomUUID();
-    const TTL = 5000;
+    const producto = req.body?.producto || "Entrada Conferencia";
 
     try {
-        const lockAdquirido = await redisClient.set(lockKey, ownerId, { NX: true, PX: TTL });
-        if (!lockAdquirido) {
-            logger.warn('[checkout-service] Compra rechazada: Recurso bloqueado en Redis', { userId: req.user.sub });
-            return res.status(409).json({ error: "El recurso está bloqueado por otra compra en curso." });
-        }
-
-        const inventoryUrl = process.env.INVENTORY_SERVICE_URL || 'http://localhost:3001';
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-        // PROPAGACIÓN DEL TOKEN JWT AL MICROSERVICIO INTERNO (Sección 13 TP7)
-        const response = await fetch(`${inventoryUrl}/api/inventario/reducir`, {
+        // PROPAGACION DEL TOKEN JWT AL MICROSERVICIO DE INVENTARIO
+        const response = await fetch(`${INVENTORY_SERVICE_URL}/api/inventario/reducir`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -124,8 +129,9 @@ app.post('/api/comprar', autenticarJWT, autorizarRoles('USER', 'ADMIN'), async (
         });
         clearTimeout(timeoutId);
 
+        const data = await response.json().catch(() => ({}));
+
         if (response.ok) {
-            const data = await response.json();
             logger.info('[checkout-service] Compra procesada exitosamente', {
                 compradorId: req.user.sub,
                 role: req.user.role,
@@ -135,23 +141,51 @@ app.post('/api/comprar', autenticarJWT, autorizarRoles('USER', 'ADMIN'), async (
                 mensaje: "Compra exitosa",
                 compradorId: req.user.sub,
                 rol: req.user.role,
+                producto,
                 stockRestante: data.stockRestante
             });
-        } else if (response.status === 400) {
-            logger.warn('[checkout-service] Compra fallida: Stock insuficiente', { compradorId: req.user.sub });
-            return res.status(400).json({ error: "Stock insuficiente" });
-        } else if (response.status === 401 || response.status === 403) {
-            return res.status(response.status).json({ error: "Rechazado por Inventory Service al validar token propagado" });
-        } else {
-            logger.error('[checkout-service] Error desde Inventory Service', { status: response.status });
-            return res.status(503).json({ error: "Servicio de inventario devolvió un error" });
         }
+
+        if (response.status === 409) {
+            logger.warn('[checkout-service] Compra rechazada: Recurso bloqueado en Inventario', {
+                compradorId: req.user.sub,
+                producto
+            });
+            return res.status(409).json({
+                error: data.error || "El recurso esta bloqueado por otra compra en curso en Inventario."
+            });
+        }
+
+        if (response.status === 400) {
+            logger.warn('[checkout-service] Compra rechazada: Stock insuficiente', {
+                compradorId: req.user.sub,
+                producto
+            });
+            return res.status(400).json({ error: data.error || "Stock insuficiente" });
+        }
+
+        if (response.status === 404) {
+            logger.warn('[checkout-service] Compra rechazada: Producto no encontrado', { producto });
+            return res.status(404).json({ error: data.error || "Producto no encontrado" });
+        }
+
+        if (response.status === 401 || response.status === 403) {
+            logger.warn('[checkout-service] Inventario rechazo token propagado', { status: response.status });
+            return res.status(response.status).json({
+                error: data.error || "Rechazado por Inventory Service al validar credenciales"
+            });
+        }
+
+        logger.error('[checkout-service] Error inesperado devuelto por Inventory Service', { status: response.status });
+        return res.status(503).json({ error: "Servicio de inventario devolvio un error inesperado" });
+
     } catch (error) {
-        logger.error('[checkout-service] Fallo de comunicación o Timeout', { error: error.message });
-        return res.status(503).json({ error: "Fallo de comunicación con Inventario o Timeout" });
-    } finally {
-        const scriptLiberacion = `if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end`;
-        await redisClient.eval(scriptLiberacion, { keys: [lockKey], arguments: [ownerId] });
+        if (error.name === 'AbortError') {
+            logger.error('[checkout-service] Timeout al comunicarse con Inventory Service (3000ms agotados)');
+            return res.status(503).json({ error: "Tiempo de espera agotado al comunicarse con Inventory Service" });
+        }
+        logger.error('[checkout-service] Fallo de comunicacion con Inventario', { error: error.message });
+        return res.status(503).json({ error: "Fallo de comunicacion con el servicio de inventario" });
     }
 });
 

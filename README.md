@@ -1,143 +1,167 @@
+# Sistema Distribuido de Venta de Entradas (TP1 - TP7)
+**Cátedra de Programación Distribuida - Universidad Champagnat**
+
+---
 
 ## 1. Descripción del Proyecto
-Este proyecto es una API REST segura y concurrente que evoluciona los conceptos del TP1 y TP2, incorporando persistencia de datos, registro de eventos (logging) y documentación interactiva. 
+Este proyecto implementa una arquitectura distribuida basada en microservicios para la gestión y venta concurrente de entradas a eventos. El sistema ha evolucionado progresivamente desde un monolito inicial hasta un conjunto desacoplado de microservicios contenerizados, con persistencia independiente, exclusión mutua distribuida, autenticación stateless con JSON Web Tokens (JWT) y control de acceso basado en roles (RBAC).
 
-**Stack Tecnológico y Dependencias:**
-* **TP1:** Node.js, Express (servidor web), Dotenv (variables de entorno), HTTPS (seguridad).
-* **TP2:** Redis / Memurai (mecanismo de exclusión mutua para concurrencia).
-* **TP3:** MongoDB y Mongoose (persistencia y modelado), Winston y winston-daily-rotate-file (logging centralizado y rotación), Swagger-ui-express (documentación OpenAPI).
-
----
-
-## 2. Requisitos Previos e Instalación
-Para ejecutar este proyecto, es necesario contar con el siguiente software instalado en el entorno de desarrollo:
-* **Node.js** (versión LTS) y **npm**.
-* **MongoDB Community Server** y **MongoDB Compass**.
-* **Memurai** o **Redis**.
-
-### Pasos de Instalación:
-1. Clonar o descomprimir el proyecto.
-2. Abrir una terminal en la raíz del proyecto y ejecutar el siguiente comando para instalar todas las dependencias acumuladas de los tres trabajos prácticos:
-
-npm install express dotenv redis mongoose winston winston-daily-rotate-file swagger-ui-express
+### Stack Tecnológico:
+* **Entorno de Ejecución:** Node.js (v20 LTS), Express.js.
+* **Persistencia Independiente:** MongoDB (bases de datos independientes por servicio: `tp6_usuarios` y `tp6_inventario`).
+* **Concurrencia y Bloqueo Distribuido:** Redis (gestión de mutex y locks temporales con expiración TTL y liberación atómica vía scripts Lua).
+* **Seguridad y Autorización:** Criptografía simétrica JWT (`HS256`), hashing con `bcryptjs`, RBAC (`USER` y `ADMIN`), propagación de identidad entre servicios.
+* **Observabilidad y Documentación:** Winston (logging estructurado con niveles de severidad), Swagger UI / OpenAPI 3.0 para cada microservicio.
+* **Orquestación e Infraestructura:** Docker y Docker Compose con healthchecks automáticos y red privada tipo bridge.
 
 ---
 
-## 3. Configuración del Entorno (.env y HTTPS)
-El proyecto utiliza variables de entorno para mantener seguros los secretos y configuraciones de red.
-
-1. Crear un archivo llamado `.env` en la raíz del proyecto (basado en el archivo `.env.example` provisto).
-2. Completar el archivo `.env` con los siguientes parámetros:
-
-PORT=3443
-HTTPS_PFX_PATH=./certificado.pfx
-HTTPS_PASSPHRASE=tu_contraseña_aqui
-REDIS_URL=redis://127.0.0.1:6379
-MONGODB_URI=mongodb://127.0.0.1:27017/tp3_distribuida
-LOG_MAX_SIZE=20m
-LOG_MAX_FILES=14d
-
-3. **HTTPS:** Asegurarse de colocar el certificado digital (`certificado.pfx`) en la raíz del proyecto, coincidiendo con la ruta configurada en `HTTPS_PFX_PATH`.
-4. **Servicios:** Verificar en los "Servicios de Windows" que `MongoDB Server` y `Memurai` (o Redis) estén en estado "En ejecución".
+## 2. Integrantes del Grupo
+* **Marcos:** Microservicio de Identidad (`user-service`), hashing con `bcryptjs`, emisión de JWT, persistencia de usuarios y configuración de Docker Compose.
+* **Nahuel:** Microservicio de Catálogo y Stock (`inventory-service`), **encapsulación de concurrencia y lock de stock en Redis**, control de acceso RBAC y validación de tokens.
+* **Lisandro:** Microservicio de Transacciones (`checkout-service`), orquestación de compra, propagación de credenciales JWT, manejo de fallos parciales y suite de pruebas reproducibles.
 
 ---
 
-## 4. Ejecución del Proyecto
-Para iniciar el servidor, ejecutar en la terminal:
+## 3. Matriz de Arquitectura y Responsabilidades
 
-npm start
-
-Si la configuración es correcta, la consola mostrará (a través de Winston) la inicialización del servidor HTTPS en el puerto 3443, y las conexiones exitosas a MongoDB y Redis.
+| Microservicio | Puerto | Responsabilidad de Dominio | Datos Propios / Almacenamiento | Dependencias Técnicas | Endpoints Principales |
+| :--- | :---: | :--- | :--- | :--- | :--- |
+| **User Service** | `3000` | Gestión centralizada de identidades, registro de clientes, emisión de credenciales y perfiles de usuario. | Base de datos MongoDB propia (`users-db:27017/tp6_usuarios`). | Ninguna (autónomo). | `POST /auth/register`<br>`POST /auth/login`<br>`GET /api/usuarios`<br>`GET /api/usuarios/:id` |
+| **Inventory Service** | `3001` | Catálogo de eventos, actualización de existencias y **control estricto de concurrencia de stock**. | Base de datos MongoDB propia (`inventory-db:27017/tp6_inventario`) y **Locks distribuidos en Redis** (`inventory-redis`). | Redis (`redis:6379`), MongoDB (`inventory-db:27017`). | `GET /api/inventario`<br>`POST /api/inventario/stock`<br>`PUT /api/inventario/reducir` |
+| **Checkout Service** | `3002` | Orquestación transaccional del proceso de compra, propagación del contexto de identidad del comprador. | *Stateless* (no almacena stock ni maneja bloqueos de bajo nivel de inventario). | `inventory-service` (vía HTTP/REST interno). | `POST /api/comprar`<br>`GET /health` |
 
 ---
 
-## 5. Instrucciones para Reproducir las Pruebas
+## 4. Encapsulación de la Concurrencia: Propiedad del Lock en Inventory Service
 
-### A. Documentación Swagger y Operaciones CRUD
-1. Con el servidor encendido, abrir un navegador y dirigirse a `https://localhost:3443/api-docs`.
-2. Desplegar el endpoint `POST /api/usuarios` y hacer clic en **Try it out**.
-3. Enviar una petición para crear un usuario. Se obtendrá un `201 Created`. Al revisar **MongoDB Compass** en la colección `usuarios`, el documento estará persistido.
-4. Enviar una segunda petición idéntica (con el mismo DNI). El sistema devolverá un `409 Conflict`, demostrando la regla de unicidad de Mongoose.
+> [!IMPORTANT]
+> **Decisión Arquitectónica Clave (Devolución TP5 y TP6):**
+> Anteriormente, `checkout-service` gestionaba el lock en Redis sobre el producto antes de invocar a `inventory-service`. Esto violaba la separación de responsabilidades y el principio de propiedad del dato: si `inventory-service` es el único dueño del stock, cualquier mecanismo de exclusión mutua que proteja ese recurso debe encapsularse **dentro de `inventory-service`**.
+>
+> **Corrección Implementada:**
+> 1. `inventory-service` administra la conexión con Redis y es el único responsable de adquirir y liberar el bloqueo (`lock:producto:<nombre>`) al procesar `PUT /api/inventario/reducir`.
+> 2. `checkout-service` ya no accede a Redis ni conoce las claves de lock; simplemente delega la reducción de existencias mediante una petición HTTP REST sincrónica hacia `inventory-service`, propagando el token JWT.
+> 3. Si `inventory-service` detecta concurrencia y no logra adquirir el lock, responde con un código `HTTP 409 Conflict`, el cual `checkout-service` transmite limpiamente al cliente.
 
-### B. Logging y Rotación (Winston)
-1. Ejecutar diversas peticiones (exitosas y fallidas) mediante Swagger o Postman.
-2. Detener el servidor y cambiar temporalmente una variable de entorno para forzar un fallo (ej. cambiar el puerto de Redis) y volver a iniciar.
-3. Revisar la carpeta `/logs` en la raíz del proyecto. Se verificará la creación de archivos separados (`application-...log` y `error-...log`) registrando eventos `INFO`, `WARN` y `ERROR`.
+```
+[ Cliente HTTP ]
+       │
+       │ POST /api/comprar (Bearer JWT)
+       ▼
+┌──────────────────────────────────────────────┐
+│             CHECKOUT SERVICE                 │
+│  - Valida firma y expiración del JWT         │
+│  - Orquesta la compra con Timeout de 3000ms  │
+└──────────────────────┬───────────────────────┘
+                       │
+                       │ PUT /api/inventario/reducir
+                       │ Headers: Authorization: Bearer <token>
+                       ▼
+┌────────────────────────────────────────────────────────┐
+│               INVENTORY SERVICE                        │
+│  - Dueño del dominio de Stock e Inventario             │
+│  - Valida rol (USER/ADMIN)                             │
+│  - Adquiere Lock en Redis: lock:producto:Entrada...    │
+│  - Descuenta en MongoDB atómicamente ($inc: -1)        │
+│  - Libera Lock en Redis mediante Lua Script            │
+└────────────┬─────────────────────────────┬─────────────┘
+             │                             │
+             ▼                             ▼
+     ┌───────────────┐             ┌───────────────┐
+     │  Redis Mutex  │             │ Inventory DB  │
+     │ (Locks Stock) │             │   (MongoDB)   │
+     └───────────────┘             └───────────────┘
+```
 
-### C. Concurrencia (Exclusión Mutua con Redis)
-1. En MongoDB Compass, asegurar que el producto "Entrada Conferencia" tenga `stock: 1`.
-2. Preparar dos pestañas idénticas en Postman apuntando a `POST https://localhost:3443/api/comprar`.
-3. Ejecutar ambas peticiones simultáneamente (con menos de 3 segundos de diferencia).
-4. La primera petición devolverá `200 OK` (compra exitosa). La segunda petición detectará el lock de Memurai/Redis y devolverá `409 Conflict` (Recurso bloqueado). El stock final en la base de datos quedará en `0`, sin números negativos.
-
-## Análisis de Fallos Parciales y Resiliencia (TP6)
-**Escenario de Fallo Parcial en Compra Concurrente:**
-1. El cliente envía `POST /api/comprar` a `checkout-service`.
-2. `checkout-service` adquiere el lock transaccional en Redis y envía `PUT /api/inventario/reducir` a `inventory-service`.
-3. `inventory-service` descuenta el stock exitosamente en su MongoDB (pasa de 1 a 0), pero sufre un corte de red intempestivo antes de poder responder `200 OK`.
-4. `checkout-service` aborta la petición a los 3000ms debido a su configuración de *Timeout*, libera el lock en Redis y responde con un `HTTP 503 Service Unavailable` al cliente.
-
-**Consecuencia e Inconsistencia:** Se genera un fallo parcial distribuido. El stock fue descontado realmente en la base de datos de inventario, pero el cliente recibió un error indicando fallo de comunicación. El bloqueo en Redis se liberó correctamente (garantizando que el sistema no se congele), pero los datos quedaron desfasados. Para mitigar esto en futuras iteraciones, se requeriría implementar un patrón Saga (transacciones compensatorias) o el uso de colas de mensajes (RabbitMQ/Kafka) para asegurar la consistencia eventual.
-## Matriz de Arquitectura - TP6
-| Microservicio | Responsabilidad | Endpoints | Datos propios | Dependencias |
-| :--- | :--- | :--- | :--- | :--- |
-| **User Service** | Gestión de identidad | `/api/usuarios` (CRUD) | BD `usuarios` | Ninguna |
-| **Inventory Service** | Catálogo y stock | `/api/inventario/reducir` (PUT) | BD `inventarios` | Ninguna |
-| **Checkout Service** | Transacciones y concurrencia | `/api/comprar` (POST) | `Locks` (Redis) | Inventory Service (HTTP) |
-<<<<<<< HEAD
-
-## 6. Análisis de Fallos Parciales y Resiliencia (TP6)
-**Escenario de Fallo Parcial en Compra Concurrente:**
-1. El cliente envía `POST /api/comprar` a `checkout-service`.
-2. `checkout-service` adquiere el lock transaccional en Redis y envía `PUT /api/inventario/reducir` a `inventory-service`.
-3. `inventory-service` descuenta el stock exitosamente en su MongoDB, pero sufre un corte de red antes de poder responder `200 OK`.
-4. `checkout-service` aborta la petición a los 3000ms debido a su configuración de *Timeout*, libera el lock en Redis y responde con un `HTTP 503 Service Unavailable` al cliente.
-
-**Consecuencia e Inconsistencia:** Se genera un fallo parcial distribuido. El stock fue descontado en la base de datos de inventario, pero el cliente recibió un error indicando fallo de comunicación. El bloqueo en Redis se liberó correctamente, pero los datos quedaron desfasados. Para mitigar esto en futuras iteraciones, se requeriría implementar un patrón Saga (transacciones compensatorias) o colas de mensajes.
-=======
->>>>>>> 0a04adadd9ebd4101de841dd48ad9b5eeb428a1c
 ---
 
-# Trabajo Práctico 7 - Autenticación, Autorización y Seguridad con JWT
+## 5. Análisis de Fallos Parciales y Resiliencia en Sistemas Distribuidos
 
-## 1. Integrantes del Grupo
-- **Integrante 1 (Marcos):** Componente de Identidad (`user-service`), hash con `bcryptjs`, emisión de JWT, propiedad del recurso y configuración de Docker Compose.
-- **Integrante 2 (Nahuel):** Protección de `inventory-service`, control de acceso basado en roles (RBAC) para gestión de stock y validación de tokens.
-- **Integrante 3 (Lisandro):** Protección de `checkout-service`, propagación del token JWT entre microservicios y documentación integral.
+En una arquitectura de microservicios con comunicación sincrónica HTTP, pueden ocurrir fallos parciales de red donde el estado de los componentes quede transitoriamente desalineado:
 
-## 2. Componente Responsable de Identidad (Sección 5 y 12)
-Se optó por **integrar la autenticación en `user-service`** (Alternativa 1), dado que este microservicio ya es propietario de la base de datos `users-db` y gestiona el ciclo de vida de los usuarios.
-- **Quién emite los tokens:** Únicamente `user-service` al validar credenciales en `POST /auth/login`.
-- **Algoritmo y Firma:** Se utiliza firma simétrica **HS256** mediante una clave secreta compartida por variable de entorno (`JWT_SECRET`).
-- **Qué servicios validan tokens:** `user-service`, `inventory-service` y `checkout-service` verifican criptográficamente la firma y expiración del JWT en sus propios middlewares sin consultar la base de datos de usuarios.
-- **Claims incluidos en el JWT:** `sub` (ObjectId del usuario), `role` (`USER` o `ADMIN`), `iss` (`user-service`), `iat` (emisión) y `exp` (vencimiento, configurado en `1h` por defecto mediante `JWT_EXPIRES_IN`).
-- **Disponibilidad ante caída del emisor:** Si `user-service` cae luego de haber emitido un token válido, `checkout-service` e `inventory-service` **continúan operando y validando peticiones normalmente**, ya que la verificación del JWT es *stateless* (autónoma mediante la firma criptográfica).
+1. **Escenario de Fallo:**
+   - El cliente envía `POST /api/comprar` a `checkout-service`.
+   - `checkout-service` envía `PUT /api/inventario/reducir` a `inventory-service` con un temporizador (*timeout*) de 3000ms.
+   - `inventory-service` adquiere el lock en Redis, descuenta con éxito el stock en su base de datos MongoDB (pasa de 1 a 0), y libera el lock.
+   - Justo antes de que la respuesta `HTTP 200 OK` viaje por la red de regreso a `checkout-service`, ocurre un corte de red intempestivo o caída transitoria.
+   - `checkout-service` agota los 3000ms sin recibir confirmación, aborta la petición y responde al cliente con un código `HTTP 503 Service Unavailable`.
+2. **Consecuencia:** Se genera una inconsistencia temporal: el stock fue descontado en `inventory-service`, pero el cliente recibió un fallo de comunicación.
+3. **Mecanismos de Mitigación en Arquitecturas Distribuidas:**
+   - **Claves de Idempotencia (*Idempotency Keys*):** El cliente o `checkout-service` envía un UUID de transacción único (`Idempotency-Key`). Si se reintenta la operación, `inventory-service` detecta la clave y no descuenta nuevamente.
+   - **Patrón Saga (Transacciones Compensatorias):** Al detectarse un error de timeout en el orquestador, se dispara automáticamente una acción compensatoria (`POST /api/inventario/reponer` o rollback compensatorio).
+   - **Mensajería Asincrónica:** Migrar transacciones críticas a brokers de mensajes durables (RabbitMQ / Apache Kafka) con garantías *at-least-once*.
 
-## 3. Clasificación de Endpoints y Matriz RBAC (Hitos 1 y 3)
+---
+
+## 6. Matriz de Control de Acceso y RBAC (TP7)
 
 | Servicio | Endpoint | Método | Acceso | Público | USER | ADMIN | Justificación Funcional |
-| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :--- |
-| **User Service** | `/health` | `GET` | Público | Sí | Sí | Sí | Healthcheck de infraestructura Docker. |
-| **User Service** | `/auth/register` | `POST` | Público | Sí | Sí | Sí | Alta de nuevos clientes con hash `bcrypt`. |
-| **User Service** | `/auth/login` | `POST` | Público | Sí | Sí | Sí | Autenticación y emisión de `accessToken`. |
-| **User Service** | `/api/usuarios` | `GET` | Restringido | No | No | Sí | Listado global sensible, exclusivo de administración. |
-| **User Service** | `/api/usuarios/:id` | `GET` | Autenticado (Propio / ADMIN) | No | Sí (Propio) | Sí | **Propiedad del recurso:** Un `USER` solo puede ver su propio `id` (`sub === :id`); `ADMIN` puede ver cualquiera. |
-| **User Service** | `/api/usuarios/:id` | `DELETE` | Restringido | No | No | Sí | Baja de cuentas exclusiva para administradores. |
-| **Inventory Service** | `/health` | `GET` | Público | Sí | Sí | Sí | Healthcheck de infraestructura Docker. |
-| **Inventory Service** | `/api/inventario` | `GET` | Público | Sí | Sí | Sí | Consulta pública de catálogo de entradas disponibles. |
-| **Inventory Service** | `/api/inventario/stock` | `POST` | Restringido | No | No | Sí | Reposición o modificación de stock exclusiva de `ADMIN`. |
-| **Inventory Service** | `/api/inventario/reducir` | `PUT` | Autenticado | No | Sí | Sí | Descuento de stock invocado con token propagado. |
-| **Checkout Service** | `/health` | `GET` | Público | Sí | Sí | Sí | Healthcheck de infraestructura Docker. |
-| **Checkout Service** | `/api/comprar` | `POST` | Autenticado | No | Sí | Sí | Compra asociada a una identidad válida. |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **User Service** | `/health` | `GET` | Público | Sí | Sí | Sí | Healthcheck de orquestación Docker. |
+| **User Service** | `/auth/register` | `POST` | Público | Sí | Sí | Sí | Registro de nuevos usuarios con hash `bcrypt` (10 rondas). |
+| **User Service** | `/auth/login` | `POST` | Público | Sí | Sí | Sí | Login y emisión de token JWT con expiración configurable. |
+| **User Service** | `/api/usuarios` | `GET` | Restringido | No | No | Sí | Listado global de cuentas, exclusivo para administración. |
+| **User Service** | `/api/usuarios/:id` | `GET` | Propietario / ADMIN | No | Sí (Propio) | Sí | **Propiedad del recurso:** Un `USER` solo consulta su propio ID; `ADMIN` consulta cualquiera. |
+| **User Service** | `/api/usuarios/:id` | `DELETE` | Restringido | No | No | Sí | Baja de cuentas de usuario, exclusivo para administradores. |
+| **Inventory Service** | `/health` | `GET` | Público | Sí | Sí | Sí | Healthcheck y estado de conexión a Mongo y Redis. |
+| **Inventory Service** | `/api/inventario` | `GET` | Público | Sí | Sí | Sí | Consulta de catálogo y entradas disponibles. |
+| **Inventory Service** | `/api/inventario/stock` | `POST` | Restringido | No | No | Sí | Carga y modificación de existencias exclusiva de `ADMIN`. |
+| **Inventory Service** | `/api/inventario/reducir` | `PUT` | Autenticado | No | Sí | Sí | Descuento concurrente de stock con lock en Redis. |
+| **Checkout Service** | `/health` | `GET` | Público | Sí | Sí | Sí | Healthcheck de disponibilidad de servicio. |
+| **Checkout Service** | `/api/comprar` | `POST` | Autenticado | No | Sí | Sí | Compra con propagación de token JWT a Inventario. |
 
-## 4. Propagación del Contexto de Identidad entre Microservicios (Sección 13)
-Cuando un usuario autenticado envía `POST /api/comprar` a `checkout-service` incluyendo el header `Authorization: Bearer <token>`, `checkout-service` valida el JWT, adquiere el bloqueo en Redis y realiza una petición HTTP `PUT` hacia `inventory-service` (`/api/inventario/reducir`) **propagando el mismo encabezado `Authorization: Bearer <token>`**. De este modo, `inventory-service` valida criptográficamente el token y registra en sus logs qué `userId` (`sub`) ejecutó el descuento de stock.
+---
 
-## 5. Variables de Entorno y Ejecución con Docker Compose (Sección 14)
-1. Copiar el archivo `.env.example` a `.env` (o utilizar los valores por defecto de desarrollo en `docker-compose.yml`):
-   - `JWT_SECRET`: Clave simétrica para firmar y verificar tokens JWT.
-   - `JWT_EXPIRES_IN`: Tiempo de expiración del token (ej. `1h`, o `10s` para pruebas de expiración).
-   - `BCRYPT_ROUNDS`: Costo de hashing para bcrypt (por defecto `10`).
-2. Levantar el entorno completo:
+## 7. Despliegue y Ejecución con Docker Compose
+
+### Requisitos Previos:
+* Docker Desktop instalado y en ejecución (con soporte para Docker Compose v2).
+* Node.js v18+ (opcional, únicamente si se desea ejecutar el script de pruebas automatizadas fuera de los contenedores).
+
+### Pasos de Puesta en Marcha:
+1. Clonar el repositorio y posicionarse en la raíz del proyecto.
+2. Iniciar todos los contenedores en segundo plano:
    ```bash
    docker compose up -d --build
+   ```
+3. Comprobar que los 6 contenedores (`users-db`, `inventory-db`, `inventory-redis`, `user-service`, `inventory-service`, `checkout-service`) se encuentren en estado `healthy`:
+   ```bash
+   docker compose ps
+   ```
+
+### Documentación Interactiva OpenAPI (Swagger):
+Con los contenedores activos, es posible acceder a las consolas Swagger de cada servicio:
+* **User Service:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+* **Inventory Service:** [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
+* **Checkout Service:** [http://localhost:3002/api-docs](http://localhost:3002/api-docs)
+
+---
+
+## 8. Pruebas Reproducibles Automatizadas
+
+Para validar de forma fehaciente y reproducible la concurrencia, la exclusión mutua del stock en Inventory Service y el control de identidades (RBAC/JWT), se desarrolló una suite completa de pruebas automatizadas:
+
+### Ejecución de la Suite:
+En una terminal en la raíz del proyecto, ejecutar:
+```bash
+node tests/test-reproducible.js
+```
+
+### Escenarios Validados en la Suite:
+1. **Healthchecks de Infraestructura:** Comprobación de que `user-service` (3000), `inventory-service` (3001) y `checkout-service` (3002) responden favorablemente.
+2. **Registro y Login (User Service):**
+   - Registro de un usuario administrador (`admin@test.com`) y un usuario cliente (`cliente@test.com`).
+   - Obtención de tokens JWT (`HS256`).
+3. **Inicialización de Inventario (Inventory Service):**
+   - El administrador ajusta el stock de `"Entrada Conferencia"` a exactamente `1` unidad para preparar la prueba de estrés concurrente.
+4. **Prueba de Concurrencia y Exclusión Mutua en Stock (Inventory Service):**
+   - Se disparan simultáneamente (usando `Promise.all`) dos compras concurrentes a `checkout-service` (`POST /api/comprar`) compitiendo por la única entrada existente.
+   - **Resultado Verificado:** Exactamente una compra resulta exitosa (`200 OK`) y la otra es rechazada (`409 Conflict` por recurso bloqueado o `400 Bad Request` por stock agotado).
+   - Se consulta el stock final en MongoDB para constatar que quedó exactamente en `0`, sin sobreventas ni números negativos.
+5. **Validación de Reglas de Seguridad (RBAC y Propiedad de Recurso):**
+   - Un usuario con rol `USER` intenta modificar el stock mediante `POST /api/inventario/stock` y recibe `HTTP 403 Forbidden`.
+   - Un usuario con rol `USER` intenta acceder a datos de otro usuario y recibe `HTTP 403 Forbidden` (violación de propiedad de recurso).
+   - Peticiones sin token o con token alterado son rechazadas con `HTTP 401 Unauthorized`.
+
+Adicionalmente, se incluye en el directorio `tests/` el archivo `tests/pruebas-api.http` para realizar pruebas interactivas mediante la extensión REST Client.

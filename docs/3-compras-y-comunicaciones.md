@@ -1,25 +1,35 @@
 # 3. Servicio de Compras y Comunicaciones
-* **Propuesta - Checkout Service:** Orquesta las transacciones. Propietario exclusivo de los bloqueos (locks) temporales en Redis.
 
-**Matriz de Comunicación:**
-1. Cliente -> `POST /api/comprar` -> Checkout Service.
-2. Checkout Service genera el lock en Redis.
-3. Checkout Service -> `PUT /api/inventario/reducir` -> Inventory Service (vía HTTP REST).
-4. Inventory Service descuenta en MongoDB y responde HTTP 200.
-5. Checkout Service libera el lock en Redis y confirma al cliente.
+## Rol de Checkout Service
+`checkout-service` actúa como orquestador de las transacciones de compra. Valida la identidad del comprador y delega la reducción de existencias a `inventory-service` propagando las credenciales JWT.
 
-**Caso de Uso 2: Registro de un nuevo Usuario**
-1. Cliente envía `POST /api/usuarios` con sus datos al **User Service**.
-2. **User Service** valida los datos (ej. DNI único).
-3. **User Service** guarda el registro en su MongoDB propietario.
-4. **User Service** responde HTTP 201 (Created) al cliente.
-(No requiere comunicación con otros microservicios).
+---
 
-## Análisis de Fallos Parciales y Resiliencia (TP6)
-**Escenario de Fallo Parcial en Compra Concurrente:**
+## Matriz de Comunicación Transaccional
+
+### Flujo de Compra Concurrente:
+1. **Cliente HTTP** envía `POST /api/comprar` con encabezado `Authorization: Bearer <token>` a `checkout-service`.
+2. **Checkout Service** valida criptográficamente la firma del JWT y que el rol sea `USER` o `ADMIN`.
+3. **Checkout Service** envía `PUT /api/inventario/reducir` a `inventory-service` vía HTTP REST interno, propagando el token JWT y estableciendo un *timeout* de 3000ms.
+4. **Inventory Service** valida el token propagado, adquiere el lock temporal en Redis (`lock:producto:...`), descuenta el stock atómicamente en MongoDB y libera el lock.
+5. **Inventory Service** responde `HTTP 200 OK` con el stock restante (o `HTTP 409 Conflict` si el lock estaba ocupado por otra compra en curso).
+6. **Checkout Service** recibe la respuesta y confirma la compra al cliente con `HTTP 200 OK`.
+
+---
+
+## Análisis de Fallos Parciales y Resiliencia
+
+### Escenario de Fallo Distribuido:
 1. El cliente envía `POST /api/comprar` a `checkout-service`.
-2. `checkout-service` adquiere el lock en Redis y envía `PUT /api/inventario/reducir` a `inventory-service`.
-3. `inventory-service` descuenta el stock en su MongoDB (pasa de 1 a 0), pero sufre un corte de red antes de responder `200 OK`.
-4. `checkout-service` aborta la petición a los 3000ms (Timeout), libera el lock en Redis y responde `503 Service Unavailable` al cliente.
+2. `checkout-service` envía `PUT /api/inventario/reducir` a `inventory-service` con un timeout de 3000ms.
+3. `inventory-service` descuenta exitosamente el stock en MongoDB (pasa de 1 a 0) y libera su lock en Redis.
+4. Antes de que `inventory-service` pueda responder `200 OK`, ocurre una falla de red o corte transitorio.
+5. `checkout-service` agota los 3000ms de timeout y responde al cliente con `HTTP 503 Service Unavailable`.
 
-**Consecuencia:** Queda un estado inconsistente: el stock se redujo en la base de datos de inventario, pero el cliente recibió un error. Para mitigarlo en el futuro se requieren claves de idempotencia o el patrón Saga (transacciones compensatorias).
+### Consecuencia:
+Se produce una inconsistencia temporal: el stock fue descontado en la base de datos de inventario, pero el cliente recibió un mensaje de error de conexión.
+
+### Estrategias de Mitigación:
+* **Claves de Idempotencia:** El cliente envía un encabezado `Idempotency-Key: <UUID>`. Ante un reintento por timeout, `inventory-service` reconoce que la operación ya fue efectuada para ese UUID y retorna la respuesta previa sin volver a descontar existencias.
+* **Patrón Saga (Compensación):** `checkout-service` puede emitir un comando compensatorio (`POST /api/inventario/reponer`) ante el descarte por timeout.
+* **Colas de Mensajería:** Utilizar un bus distribuido (RabbitMQ o Kafka) con confirmaciones de acuse de recibo (*acknowledgments*) para garantizar entrega segura *at-least-once*.

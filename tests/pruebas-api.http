@@ -1,0 +1,151 @@
+### ==============================================================================
+### COLECCIÓN DE PRUEBAS MANUALES HTTP - SISTEMA DISTRIBUIDO
+### ==============================================================================
+
+@userUrl = http://localhost:3000
+@inventoryUrl = http://localhost:3001
+@checkoutUrl = http://localhost:3002
+
+### 1. HEALTHCHECKS
+### 1.1 Healthcheck User Service
+GET {{userUrl}}/health
+
+### 1.2 Healthcheck Inventory Service (Verifica Redis y MongoDB)
+GET {{inventoryUrl}}/health
+
+### 1.3 Healthcheck Checkout Service
+GET {{checkoutUrl}}/health
+
+### ==============================================================================
+### 2. AUTENTICACIÓN Y ROLES (USER SERVICE)
+### ==============================================================================
+
+### 2.1 Registro de Usuario ADMIN
+# @name registrarAdmin
+POST {{userUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "nombre": "Admin",
+  "apellido": "General",
+  "dni": "10000001",
+  "telefono": "2614001122",
+  "mail": "admin@eventos.com",
+  "password": "PasswordAdmin123",
+  "role": "ADMIN"
+}
+
+### 2.2 Login ADMIN (Copia el accessToken de la respuesta)
+# @name loginAdmin
+POST {{userUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "mail": "admin@eventos.com",
+  "password": "PasswordAdmin123"
+}
+
+### Guardar Token Admin
+@adminToken = {{loginAdmin.response.body.accessToken}}
+
+### 2.3 Registro de Usuario USER (Cliente)
+# @name registrarCliente
+POST {{userUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "nombre": "Juan",
+  "apellido": "Perez",
+  "dni": "20000002",
+  "telefono": "2614003344",
+  "mail": "juan@correo.com",
+  "password": "PasswordJuan123",
+  "role": "USER"
+}
+
+### 2.4 Login USER (Cliente)
+# @name loginCliente
+POST {{userUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "mail": "juan@correo.com",
+  "password": "PasswordJuan123"
+}
+
+### Guardar Token Cliente y User ID
+@userToken = {{loginCliente.response.body.accessToken}}
+@userId = {{loginCliente.response.body.usuario.id}}
+
+### ==============================================================================
+### 3. GESTIÓN DE INVENTARIO Y STOCK (INVENTORY SERVICE)
+### ==============================================================================
+
+### 3.1 Consulta de Catálogo (Público)
+GET {{inventoryUrl}}/api/inventario
+
+### 3.2 Modificación de Stock como ADMIN (Fijar en 1 para prueba de concurrencia)
+POST {{inventoryUrl}}/api/inventario/stock
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "producto": "Entrada Conferencia",
+  "stock": 1
+}
+
+### 3.3 Intento de Modificación de Stock como USER normal (Debe devolver 403 Forbidden)
+POST {{inventoryUrl}}/api/inventario/stock
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "producto": "Entrada Conferencia",
+  "stock": 999
+}
+
+### ==============================================================================
+### 4. COMPRAS Y CONCURRENCIA (CHECKOUT SERVICE)
+### ==============================================================================
+
+### 4.1 Compra Exitosa (Petición 1)
+POST {{checkoutUrl}}/api/comprar
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "producto": "Entrada Conferencia"
+}
+
+### 4.2 Compra Rechazada por Stock Agotado (Petición 2 - Debe devolver 400 Bad Request)
+POST {{checkoutUrl}}/api/comprar
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "producto": "Entrada Conferencia"
+}
+
+### 4.3 Intento de Compra sin Token (Debe devolver 401 Unauthorized)
+POST {{checkoutUrl}}/api/comprar
+Content-Type: application/json
+
+{
+  "producto": "Entrada Conferencia"
+}
+
+### ==============================================================================
+### 5. PROPIEDAD DEL RECURSO (USER SERVICE)
+### ==============================================================================
+
+### 5.1 Consultar Propio Perfil (Debe devolver 200 OK)
+GET {{userUrl}}/api/usuarios/{{userId}}
+Authorization: Bearer {{userToken}}
+
+### 5.2 Consultar Perfil Ajeno como USER (Debe devolver 403 Forbidden)
+GET {{userUrl}}/api/usuarios/660000000000000000000001
+Authorization: Bearer {{userToken}}
+
+### 5.3 Listar Todos los Usuarios como ADMIN (Debe devolver 200 OK)
+GET {{userUrl}}/api/usuarios
+Authorization: Bearer {{adminToken}}

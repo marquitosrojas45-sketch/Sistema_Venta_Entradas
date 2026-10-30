@@ -1,66 +1,30 @@
-# Inventory Service — Sistema de Venta de Entradas
+# Inventory & Stock Service (`inventory-service`)
 
 ## Descripción
+Microservicio encargado del catálogo de entradas a eventos, la persistencia de existencias y la **encapsulación de la exclusión mutua distribuida** mediante Redis para garantizar la consistencia del stock ante operaciones concurrentes.
 
-Microservicio encargado de gestionar el inventario de entradas disponibles para el sistema de venta de entradas.
+## Decisión Arquitectónica Clave: Propiedad del Lock
+Al ser el propietario único del dato de stock (`MongoDB tp6_inventario`), `inventory-service` encapsula el mecanismo de bloqueo distribuido (Redis). Cualquier intento de compra o reducción de existencias debe pasar por este servicio, el cual adquiere un lock temporal (`lock:producto:<nombre>`), ejecuta el decremento atómico y libera el recurso mediante scripts Lua atómicos. Si el recurso está bloqueado, responde `HTTP 409 Conflict`.
 
-## Tecnologías
-
-- Node.js
-- Express
-- API REST
+## Tecnologías Principales
+* **Node.js y Express.js**
+* **MongoDB con Mongoose:** Persistencia de catálogo y stock en `tp6_inventario`.
+* **Redis Client:** Gestión de locks distribuidos atómicos (`SET NX PX` y Lua Script de liberación segura).
+* **JsonWebToken:** Verificación criptográfica de tokens propagados y RBAC.
+* **Winston:** Logging de reducciones y bloqueos de concurrencia.
+* **Swagger UI:** Documentación interactiva OpenAPI 3.0 en `/api-docs`.
 
 ## Puerto
+* Por defecto: `3001` (configurable mediante `PORT`).
 
-El servicio utiliza el puerto `3003` de forma predeterminada. Puede configurarse mediante la variable de entorno `PORT`.
+## Variables de Entorno
+* `PORT`: Puerto de escucha del servidor HTTP (3001).
+* `MONGODB_URI`: URL de conexión a MongoDB (`mongodb://inventory-db:27017/tp6_inventario`).
+* `REDIS_URL`: URL de conexión al broker de locks Redis (`redis://redis:6379` en Docker).
+* `JWT_SECRET`: Clave simétrica compartida para verificación de tokens.
 
-## Instalación
-
-Desde la carpeta `inventory-service`, ejecutar:
-
-```bash
-npm install
-```
-
-## Ejecución
-
-Para iniciar el servicio:
-
-```bash
-npm start
-```
-
-## Endpoints disponibles
-
-### GET /health
-
-Verifica que el servicio esté funcionando.
-
-Respuesta esperada:
-
-```json
-{
-  "status": "Inventory Service is running"
-}
-```
-
-### GET /inventory
-
-Devuelve una respuesta inicial con una lista vacía de entradas.
-
-Respuesta esperada:
-
-```json
-{
-  "message": "Listado de entradas disponibles",
-  "entries": []
-}
-```
-
-## Estado actual
-
-El servicio cuenta con un servidor Express y dos endpoints de prueba. La gestión persistente del inventario, las operaciones de actualización de disponibilidad y la integración con los demás microservicios quedan pendientes de implementación.
-
-## Ejecución local
-
-URL base: `http://localhost:3003`
+## Endpoints Principales
+* `GET /health`: Healthcheck y estado de conexión a MongoDB y Redis.
+* `GET /api/inventario`: Catálogo y existencias actuales (público).
+* `POST /api/inventario/stock`: Creación o modificación de stock (exclusivo `ADMIN`).
+* `PUT /api/inventario/reducir`: Reducción concurrente con lock en Redis (`USER` o `ADMIN`).
