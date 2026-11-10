@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Presentación del Proyecto - Sistema Distribuido de Venta de Entradas (TP1 a TP7)</title>
+<style>
+  @page { size: 297mm 167mm; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    background: #0f172a;
+    color: #1e293b;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .slide {
+    width: 297mm;
+    height: 167mm;
+    padding: 12mm 16mm;
+    background: #ffffff;
+    page-break-after: always;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .slide.cover {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1d4ed8 100%);
+    color: #ffffff;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20mm 24mm;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.25);
+    border: 1px solid #60a5fa;
+    color: #93c5fd;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 11pt;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .cover h1 { font-size: 30pt; line-height: 1.15; font-weight: 800; margin-bottom: 12px; color: #ffffff; }
+  .cover h2 { font-size: 15pt; font-weight: 400; color: #cbd5e1; margin-bottom: 26px; max-width: 85%; }
+  .cover-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; margin-top: 10px; }
+  .cover-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+  .cover-card h4 { color: #93c5fd; font-size: 11pt; margin-bottom: 4px; }
+  .cover-card p { color: #e2e8f0; font-size: 9.5pt; line-height: 1.35; }
+  .slide-header {
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .slide-header h2 { font-size: 18pt; color: #0f172a; font-weight: 800; }
+  .slide-header .tag {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    font-size: 9.5pt;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+  .slide-content { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #2563eb;
+    border-radius: 8px;
+    padding: 10px 13px;
+  }
+  .card.green { border-left-color: #16a34a; background: #f0fdf4; }
+  .card.amber { border-left-color: #d97706; background: #fffbeb; }
+  .card.red   { border-left-color: #dc2626; background: #fef2f2; }
+  .card.purple{ border-left-color: #7c3aed; background: #f5f3ff; }
+  .card h3 { font-size: 11.5pt; color: #0f172a; margin-bottom: 5px; font-weight: 700; }
+  .card p, .card li { font-size: 9.2pt; color: #334155; line-height: 1.38; }
+  .card ul { padding-left: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 8.8pt; }
+  th { background: #1e293b; color: #ffffff; text-align: left; padding: 6px 9px; font-weight: 700; }
+  td { padding: 5.5px 9px; border-bottom: 1px solid #cbd5e1; color: #1e293b; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  code, pre { font-family: 'Consolas', 'Courier New', monospace; }
+  code { background: #e2e8f0; color: #0f172a; padding: 1px 5px; border-radius: 4px; font-size: 8.5pt; }
+  pre { background: #0f172a; color: #e2e8f0; padding: 8px 11px; border-radius: 6px; font-size: 8.2pt; line-height: 1.35; overflow: hidden; }
+  .arch-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f1f5f9;
+    border: 1px dashed #64748b;
+    border-radius: 10px;
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .svc-node { background: #ffffff; border: 2px solid #2563eb; border-radius: 8px; padding: 8px 10px; text-align: center; flex: 1; }
+  .svc-node.amber { border-color: #d97706; }
+  .svc-node.green { border-color: #16a34a; }
+  .svc-node h4 { font-size: 10pt; color: #0f172a; margin-bottom: 3px; }
+  .svc-node p  { font-size: 8pt; color: #475569; }
+  .arrow { font-size: 14pt; font-weight: bold; color: #2563eb; text-align: center; }
+  .slide-footer { border-top: 1px solid #e2e8f0; padding-top: 5px; display: flex; justify-content: space-between; font-size: 8pt; color: #64748b; }
+</style>
+</head>
+<body>
+
+<section class="slide cover">
+  <span class="badge">Universidad Champagnat · Licenciatura en Sistemas de Información</span>
+  <h1>Sistema Distribuido de Venta de Entradas<br>Arquitectura de Microservicios (TP1 – TP7)</h1>
+  <h2>Persistencia Aislada en MongoDB, Concurrencia Encapsulada con Locks en Redis y Scripts Lua, Contenedores Docker y Seguridad Distribuida con JWT (HS256) y RBAC.</h2>
+  <div class="cover-grid">
+    <div class="cover-card">
+      <h4>Marcos — User Service (:3000)</h4>
+      <p>Componente de Identidad, hashing con <b>bcryptjs</b>, emisión de JWT, propiedad del recurso y Docker Compose.</p>
+    </div>
+    <div class="cover-card">
+      <h4>Nahuel — Inventory Service (:3001)</h4>
+      <p>Catálogo y stock, <b>encapsulación del Lock distribuido en Redis</b>, persistencia MongoDB y control RBAC.</p>
+    </div>
+    <div class="cover-card">
+      <h4>Lisandro — Checkout Service (:3002)</h4>
+      <p>Orquestación transaccional, propagación de JWT, manejo de Timeouts (3000ms), fallos parciales y pruebas reproducibles.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-header">
+    <h2>1. Objetivo del Proyecto y Evolución Arquitectónica (TP1 a TP7)</h2>
+    <span class="tag">Evolución</span>
+  </div>
+  <div class="slide-content">
+    <div class="card">
+      <h3>El Problema de Dominio: Venta Concurrente de Entradas con Stock Limitado</h3>
+      <p>En la venta de entradas para eventos de alta demanda, múltiples usuarios intentan adquirir simultáneamente las últimas localidades disponibles. Sin mecanismos adecuados de exclusión mutua y desacoplamiento, se producen condiciones de carrera (<i>race conditions</i>), sobreventa (stock negativo) y fallos en cascada. Nuestro sistema evoluciona desde una API monolítica hasta 3 microservicios independientes que garantizan consistencia, seguridad y resiliencia.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card purple">
+        <h3>Fase 1: Base Monolítica (TP1 - TP3)</h3>
+        <ul>
+          <li><b>TP1:</b> Servidor Express con variables <code>.env</code> y cifrado en tránsito HTTPS.</li>
+          <li><b>TP2:</b> Exclusión mutua en Redis (<code>SET NX PX 5000</code>) y liberación atómica mediante Script Lua.</li>
+          <li><b>TP3:</b> Persistencia MongoDB con Mongoose, logging rotativo en Winston y Swagger UI.</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Fase 2: Microservicios y Docker (TP5 - TP6)</h3>
+        <ul>
+          <li><b>TP5:</b> Descomposición DDD en User, Inventory y Checkout Service. Matrices de propiedad y acoplamiento.</li>
+          <li><b>TP6:</b> Contenedores con Docker Compose, red <code>backend-net</code>, volúmenes y healthchecks.</li>
+          <li><b>Encapsulación del Lock:</b> Inventory centraliza el stock en MongoDB y el Lock en Redis.</li>
+        </ul>
+      </div>
+      <div class="card amber">
+        <h3>Fase 3: Seguridad JWT y RBAC (TP7)</h3>
+        <ul>
+          <li><b>Registro Seguro:</b> Hashing con <code>bcryptjs</code> (10 rondas) y emisión de JWT (<code>HS256</code>) en User Service.</li>
+          <li><b>Validación Stateless:</b> Verificación autónoma de firma y expiración en cada servicio.</li>
+          <li><b>Propagación y RBAC:</b> Propagación de JWT desde Checkout hacia Inventory y control de roles.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Sistema Distribuido de Venta de Entradas | Universidad Champagnat</span>
+    <span>Diapositiva 2 / 10</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-header">
+    <h2>2. Arquitectura General de Microservicios y Propiedad de Datos</h2>
+    <span class="tag">Arquitectura</span>
+  </div>
+  <div class="slide-content">
+    <div class="arch-box">
+      <div class="svc-node">
+        <h4>user-service (:3000)</h4>
+        <p>Identidad, Bcrypt, Login JWT y RBAC</p>
+        <p style="margin-top:4px;color:#16a34a;font-weight:bold;">▼ MongoDB (users-db)</p>
+      </div>
+      <div class="arrow">── JWT ──►</div>
+      <div class="svc-node amber">
+        <h4>checkout-service (:3002)</h4>
+        <p>Orquestador de Compras (Stateless)<br>Timeout 3000ms + Propaga JWT</p>
+      </div>
+      <div class="arrow">PUT /reducir<br>(Bearer JWT)<br>──────►</div>
+      <div class="svc-node green">
+        <h4>inventory-service (:3001)</h4>
+        <p>Catálogo, Stock y Concurrencia</p>
+        <p style="margin-top:4px;color:#dc2626;font-weight:bold;">▼ Redis (Locks) + ▼ MongoDB (Stock)</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Principio de Propiedad de Datos (Database per Service)</h3>
+        <ul>
+          <li><b>Usuarios (MongoDB <code>tp6_usuarios</code>):</b> Propiedad exclusiva de <code>user-service</code>.</li>
+          <li><b>Catálogo y Stock (MongoDB <code>tp6_inventario</code>):</b> Propiedad exclusiva de <code>inventory-service</code>.</li>
+          <li><b>Locks de Stock (Redis <code>inventory-redis</code>):</b> Uso interno exclusivo de <code>inventory-service</code>.</li>
+          <li><b>Contexto de Sesión (JWT):</b> Emitido por <code>user-service</code> y verificado criptográficamente en memoria.</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Bajo Acoplamiento y Alta Cohesión</h3>
+        <ul>
+          <li><b>Desacoplamiento de Identidad:</b> Ni Checkout ni Inventory necesitan llamar a User Service durante una compra.</li>
+          <li><b>Desacoplamiento de Concurrencia:</b> Checkout desconoce Redis y delega la reducción de stock a Inventory vía HTTP REST.</li>
+          <li><b>Estabilidad:</b> User e Inventory tienen acoplamiento eferente nulo (<code>Ce = 0, I = 0.00</code>).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Sistema Distribuido de Venta de Entradas | Universidad Champagnat</span>
+    <span>Diapositiva 3 / 10</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-header">
+    <h2>3. Microservicio 1: User &amp; Identity Service (Puerto 3000)</h2>
+    <span class="tag">User Service</span>
+  </div>
+  <div class="slide-content">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Responsabilidades y Reglas de Negocio</h3>
+        <ul>
+          <li><b>Registro (<code>POST /auth/register</code>):</b> Valida campos obligatorios, longitud mínima de contraseña (&gt;= 6) y unicidad de DNI y mail (<code>409 Conflict</code>).</li>
+          <li><b>Hashing Criptográfico:</b> Aplica <code>bcrypt.hash(password, 10)</code> y oculta <code>passwordHash</code> en el método <code>toJSON</code>.</li>
+          <li><b>Login y Emisión JWT (<code>POST /auth/login</code>):</b> Emite token firmado con <code>HS256</code> con claims <code>sub</code>, <code>role</code>, <code>iss</code>, <code>iat</code> y <code>exp</code>.</li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <h3>Control de Acceso (RBAC) y Propiedad del Recurso</h3>
+        <ul>
+          <li><b>Listado Global (<code>GET /api/usuarios</code>):</b> Exclusivo para el rol <code>ADMIN</code> (<code>403 Forbidden</code> a usuarios comunes).</li>
+          <li><b>Propiedad del Recurso (<code>GET /api/usuarios/:id</code>):</b> Un <code>USER</code> solo puede consultar su propio ID (<code>req.user.sub === req.params.id</code>).</li>
+          <li><b>Baja de Cuentas (<code>DELETE /api/usuarios/:id</code>):</b> Exclusivo para <code>ADMIN</code>.</li>
+        </ul>
+      </div>
+    </div>
+    <pre>const payload = { sub: usuario._id.toString(), role: usuario.role, iss: 'user-service' };
+const accessToken = jwt.sign(payload, JWT_SECRET, { algorithm: 'HS256', expiresIn: JWT_EXPIRES_IN });</pre>
+  </div>
+  <div class="slide-footer">
+    <span>Sistema Distribuido de Venta de Entradas | Universidad Champagnat</span>
+    <span>Diapositiva 4 / 10</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-header">
+    <h2>4. Microservicio 2: Inventory &amp; Stock Service (Puerto 3001)</h2>
+    <span class="tag">Inventory Service</span>
+  </div>
+  <div class="slide-content">
+    <div class="grid-2">
+      <div class="card green">
+        <h3>Propiedad del Stock y Concurrencia</h3>
+        <ul>
+          <li><b>Catálogo Público (<code>GET /api/inventario</code>):</b> Consulta de eventos y entradas disponibles.</li>
+          <li><b>Carga Administrativa (<code>POST /api/inventario/stock</code>):</b> Creación o reposición de stock exclusiva para <code>ADMIN</code>.</li>
+          <li><b>Reducción Concurrente (<code>PUT /api/inventario/reducir</code>):</b> Encapsula el Lock en Redis y el decremento atómico en MongoDB.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>¿Por qué el Lock de Redis vive en Inventory Service?</h3>
+        <ul>
+          <li><b>Coherencia con el Dominio:</b> Inventory es el único dueño del stock; ninguna capa externa debe manejar bloqueos sobre su dato.</li>
+          <li><b>Prevención de Sobreventa:</b> Adquiere el lock con <code>SET NX PX 5000</code>; si está ocupado devuelve <code>409 Conflict</code> de inmediato.</li>
+          <li><b>Liberación Atómica:</b> En el bloque <code>finally</code>, un Script Lua valida el <code>ownerId</code> antes de borrar la clave.</li>
+        </ul>
+      </div>
+    </div>
+    <pre>lockAdquirido = await redisClient.set(lockKey, ownerId, { NX: true, PX: 5000 }); // Si es null -> 409 Conflict
+const item = await Inventario.findOneAndUpdate({ producto: nombreProd, stock: { $gt: 0 } }, { $inc: { stock: -1 } }, { new: true });
+const scriptLiberacion = `if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end`;</pre>
+  </div>
+  <div class="slide-footer">
+    <span>Sistema Distribuido de Venta de Entradas | Universidad Champagnat</span>
+    <span>Diapositiva 5 / 10</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-header">
+    <h2>5. Microservicio 3: Checkout &amp; Transaction Service (Puerto 3002)</h2>
+    <span class="tag">Checkout Service</span>
+  </div>
+  <div class="slide-content">
+    <div class="grid-2">
+      <div class="card amber">
+        <h3>Orquestación de Compras y Propagación JWT</h3>
+        <ul>
+          <li><b>Fachada Transaccional (<code>POST /api/comprar</code>):</b> Recibe la orden de compra del cliente autenticado.</li>
+          <li><b>Diseño Stateless:</b> Sin base de datos ni Redis propio; delega la validación de stock a <code>inventory-service</code>.</li>
+          <li><b>Propagación del Token:</b> Reenvía <code>Authorization: Bearer &lt;token&gt;</code> hacia Inventory para mantener auditoría completa.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Timeout Explícito y Semántica de Errores</h3>
+        <ul>
+          <li><b>Timeout de 3000 ms:</b> Usa <code>AbortController</code> para abortar llamadas lentas hacia Inventory.</li>
+          <li><b>Traducción Semántica:</b> <code>200 OK</code> (compra exitosa), <code>409 Conflict</code> (lock ocupado), <code>400 Bad Request</code> (stock agotado), <code>404 Not Found</code> (producto inexistente) y <code>503 Service Unavailable</code> (timeout o caída).</li>
+        </ul>
+      </div>
+    </div>
+    <pre>const controller = new AbortController(); const timeoutId = setTimeout(() => controller.abort(), 3000);
+const response = await fetch(`${INVENTORY_SERVICE_URL}/api/inventario/reducir`, {
+  method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${req.rawToken}` },
+  body: JSON.stringify({ producto }), signal: controller.signal });</pre>
+  </div>
+  <div class="slide-footer">
+    <span>Sistema Distribuido de Venta de Entradas | Universidad Champagnat</span>
+    <span>Diapositiva 6 / 10</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-header">
+    <h2>6. Análisis de Fallos Parciales y Resiliencia en el Flujo de Compra</h2>
+    <span class="tag">Fallos Parciales</span>
+  </div>
+  <div class="slide-content">
+    <div class="grid-2">
+      <div class="card red">
+        <h3>Secuencia del Escenario de Fallo Parcial Distribuido</h3>
+        <ul>
+          <li><b>1. Participantes:</b> Cliente → <code>checkout-service</code> → <code>inventory-service</code> (Redis + MongoDB).</li>
+          <li><b>2. Cambio de Estado:</b> Inventory adquiere el lock, descuenta el stock en MongoDB (de 1 a 0) y libera el lock.</li>
+          <li><b>3. Punto de Falla:</b> Corte de red antes de que el <code>200 OK</code> llegue a Checkout.</li>
+          <li><b>4. Inconsistencia:</b> Checkout aborta a los 3000ms y devuelve <code>503</code>, aunque el stock ya fue descontado en BD.</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Mecanismos de Recuperación y Compensación</h3>
+        <ul>
+          <li><b>1. Claves de Idempotencia (<code>Idempotency-Key</code>):</b> UUID único de operación para que ante un reintento Inventory devuelva la confirmación previa sin descontar dos veces.</li>
+          <li><b>2. Patrón Saga:</b> Transacción compensatoria (<code>POST /api/inventario/reponer</code>) disparada ante el aborto de la compra.</li>
+          <li><b>3. Mensajería Asincrónica:</b> Colas durables (RabbitMQ / Kafka) con confirmaciones ACK.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Aislamiento de Fallos ante Caída de Dependencias</h3>
+      <p>Si el contenedor de <code>inventory-service</code> se detiene, <code>checkout-service</code> no finaliza su proceso: registra el fallo en Winston y responde controladamente <code>HTTP 503 Service Unavailable</code>, recuperándose automáticamente en cuanto Inventory vuelve a estar en línea.</p>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Sistema Distribuido de Venta de Entradas | Universidad Champagnat</span>
+    <span>Diapositiva 7 / 10</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-header">
+    <h2>7. Contenerización e Infraestructura con Docker Compose</h2>
+    <span class="tag">Docker Compose</span>
+  </div>
+  <div class="slide-content">
+    <div class="grid-3">
+      <div class="card">
+        <h3>1. Imágenes y .dockerignore</h3>
+        <ul>
+          <li>Imagen base liviana <code>node:20-alpine</code>.</li>
+          <li>Instalación reproducible con <code>npm install --omit=dev</code>.</li>
+          <li>Archivos <code>.dockerignore</code> que excluyen <code>node_modules</code>, <code>.env</code>, logs y certificados.</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>2. Red Interna y Seguridad</h3>
+        <ul>
+          <li>Red privada <code>backend-net</code> con resolución DNS por nombre de servicio.</li>
+          <li>Solo se publican al host los puertos <code>3000</code>, <code>3001</code> y <code>3002</code>.</li>
+          <li>MongoDB y Redis permanecen aislados sin exponer puertos al host.</li>
+        </ul>
+      </div>
+      <div class="card amber">
+        <h3>3. Volúmenes y Healthchecks</h3>
+        <ul>
+          <li>Volúmenes persistentes nombrados: <code>users_mongo_data</code> e <code>inventory_mongo_data</code>.</li>
+          <li>Arranque coordinado mediante <code>healthcheck</code> y <code>depends_on: condition: service_healthy</code>.</li>
+        </ul>
+      </div>
+    </div>
+    <pre>Entorno Docker Compose -> MONGODB_URI=mongodb://inventory-db:27017/tp6_inventario | REDIS_URL=redis://redis:6379
+Entorno Local Node.js  -> MONGODB_URI=mongodb://127.0.0.1:27017/tp6_inventario    | REDIS_URL=redis://127.0.0.1:6379</pre>
+  </div>
+  <div class="slide-footer">
+    <span>Sistema Distribuido de Venta de Entradas | Universidad Champagnat</span>
+    <span>Diapositiva 8 / 10</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-header">
+    <h2>8. Matriz RBAC, Logging con Winston y Documentación OpenAPI</h2>
+    <span class="tag">RBAC &amp; Swagger</span>
+  </div>
+  <div class="slide-content">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Matriz de Control de Acceso Basado en Roles (RBAC)</h3>
+        <ul>
+          <li><b>User Service (:3000):</b> <code>/health</code>, <code>/auth/register</code> y <code>/auth/login</code> públicos; <code>GET /api/usuarios/:id</code> propio o ADMIN; <code>GET /api/usuarios</code> y <code>DELETE</code> exclusivo ADMIN.</li>
+          <li><b>Inventory Service (:3001):</b> <code>/health</code> y <code>GET /api/inventario</code> públicos; <code>POST /api/inventario/stock</code> exclusivo ADMIN; <code>PUT /api/inventario/reducir</code> USER o ADMIN.</li>
+          <li><b>Checkout Service (:3002):</b> <code>/health</code> público; <code>POST /api/comprar</code> USER o ADMIN.</li>
+        </ul>
+      </div>
+      <div class="card green">
+        <h3>Observabilidad y Documentación Interactiva</h3>
+        <ul>
+          <li><b>Logging Estructurado (Winston):</b> Registra timestamp, severidad (<code>INFO</code>, <code>WARN</code>, <code>ERROR</code>), servicio y metadatos de auditoría. Consultable con <code>docker compose logs -f</code>.</li>
+          <li><b>Portales Swagger UI (OpenAPI 3.0):</b><br>
+            • <code>http://localhost:3000/api-docs</code><br>
+            • <code>http://localhost:3001/api-docs</code><br>
+            • <code>http://localhost:3002/api-docs</code>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Sistema Distribuido de Venta de Entradas | Universidad Champagnat</span>
+    <span>Diapositiva 9 / 10</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="slide-header">
+    <h2>9. Suite de Pruebas Reproducibles Automatizadas y Conclusiones</h2>
+    <span class="tag">Validación y Tests</span>
+  </div>
+  <div class="slide-content">
+    <div class="card green">
+      <h3>Ejecución Automatizada de Punta a Punta (<code>npm test</code> / <code>node tests/test-reproducible.js</code>)</h3>
+      <ul>
+        <li><b>Fase 1 (Healthchecks):</b> Comprueba la salud de los 3 microservicios y sus conexiones a MongoDB y Redis.</li>
+        <li><b>Fase 2 y 3 (Identidad y Preparación):</b> Registra y autentica usuarios <code>ADMIN</code> y <code>USER</code>, y fija el stock de <i>"Entrada Conferencia"</i> en <code>1</code> unidad.</li>
+        <li><b>Fase 4 (Concurrencia Real con <code>Promise.all</code>):</b> Dispara 2 compras simultáneas por la única entrada disponible, verificando que exactamente 1 responda <code>200 OK</code> y la otra sea rechazada (<code>409 / 400</code>), dejando el stock final en <code>0</code> sin sobreventas.</li>
+        <li><b>Fase 5 y 6 (Seguridad RBAC):</b> Verifica el rechazo <code>400</code> con stock agotado, el bloqueo <code>403</code> ante intento de alteración de stock o lectura de perfil ajeno, y el rechazo <code>401</code> sin token.</li>
+      </ul>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Comandos para Reproducir la Demostración</h3>
+        <pre>docker compose up -d --build
+npm test</pre>
+      </div>
+      <div class="card purple">
+        <h3>Conclusión General</h3>
+        <p>El proyecto integra límites claros de microservicios, concurrencia encapsulada en el dueño del dato, seguridad distribuida con JWT y un entorno 100% reproducible con Docker.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Sistema Distribuido de Venta de Entradas | Universidad Champagnat</span>
+    <span>Diapositiva 10 / 10</span>
+  </div>
+</section>
+
+</body>
+</html>

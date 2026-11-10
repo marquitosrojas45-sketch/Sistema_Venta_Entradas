@@ -1,43 +1,66 @@
 <mxfile host="65bd71144e">
-    <diagram id="HtjBdibTBGlVeweCLakJ" name="Arquitectura Microservicios">
-        <mxGraphModel dx="961" dy="607" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <diagram id="HtjBdibTBGlVeweCLakJ" name="Arquitectura Microservicios Final">
+        <mxGraphModel dx="1100" dy="750" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;Servicio de Usuarios&lt;/b&gt;" vertex="1">
-                    <mxGeometry height="80" width="160" x="260" y="240" as="geometry"/>
+                <!-- Cliente Externo -->
+                <mxCell id="client-1" value="&lt;b&gt;Cliente HTTP&lt;/b&gt;&lt;br&gt;(Web / Postman / Suite de Tests)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="40" width="280" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;Servicio de Inventario&lt;/b&gt;" vertex="1">
-                    <mxGeometry height="80" width="160" x="700" y="240" as="geometry"/>
+                <!-- Red Docker -->
+                <mxCell id="docker-net" value="Red Interna Docker Compose (backend-net)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#999999;dashed=1;startSize=30;" vertex="1" parent="1">
+                    <mxGeometry x="80" y="160" width="1000" height="580" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;b&gt;Servicio de Compras&lt;/b&gt;" vertex="1">
-                    <mxGeometry height="80" width="160" x="480" y="440" as="geometry"/>
+                <!-- User Service -->
+                <mxCell id="user-svc" value="&lt;b&gt;User Service (:3000)&lt;/b&gt;&lt;br&gt;Identidad, Registro, Login,&lt;br&gt;Emisión JWT (HS256) y RBAC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="docker-net">
+                    <mxGeometry x="60" y="80" width="220" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-15" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;" value="MongoDB&lt;br&gt;(Usuarios)" vertex="1">
-                    <mxGeometry height="80" width="120" x="280" y="380" as="geometry"/>
+                <!-- Checkout Service -->
+                <mxCell id="checkout-svc" value="&lt;b&gt;Checkout Service (:3002)&lt;/b&gt;&lt;br&gt;Orquestador de Compras (Stateless)&lt;br&gt;Timeout 3000ms + Propagación JWT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="docker-net">
+                    <mxGeometry x="390" y="80" width="230" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-16" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;" value="MongoDB&lt;br&gt;(Inventario)" vertex="1">
-                    <mxGeometry height="80" width="120" x="720" y="380" as="geometry"/>
+                <!-- Inventory Service -->
+                <mxCell id="inventory-svc" value="&lt;b&gt;Inventory Service (:3001)&lt;/b&gt;&lt;br&gt;Catálogo, Propiedad de Stock&lt;br&gt;y Encapsulación de Concurrencia (Lock)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="docker-net">
+                    <mxGeometry x="710" y="80" width="240" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-17" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" value="Redis&lt;br&gt;(Locks)" vertex="1">
-                    <mxGeometry height="80" width="120" x="500" y="580" as="geometry"/>
+                <!-- MongoDB Usuarios -->
+                <mxCell id="users-db" value="&lt;b&gt;MongoDB (users-db)&lt;/b&gt;&lt;br&gt;BD: tp6_usuarios&lt;br&gt;Volumen: users_mongo_data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="docker-net">
+                    <mxGeometry x="90" y="340" width="160" height="100" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-18" edge="1" parent="1" source="bd_Pcx_Rlhs7LUIoi_rt-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=classic;endFill=1;" target="bd_Pcx_Rlhs7LUIoi_rt-15">
+                <!-- Redis Locks (Propiedad de Inventory) -->
+                <mxCell id="inventory-redis" value="&lt;b&gt;Redis (inventory-redis)&lt;/b&gt;&lt;br&gt;Locks Distribuidos de Stock&lt;br&gt;(SET NX PX 5000 + Lua)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="docker-net">
+                    <mxGeometry x="620" y="340" width="170" height="100" as="geometry"/>
+                </mxCell>
+                <!-- MongoDB Inventario -->
+                <mxCell id="inventory-db" value="&lt;b&gt;MongoDB (inventory-db)&lt;/b&gt;&lt;br&gt;BD: tp6_inventario&lt;br&gt;Volumen: inventory_mongo_data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="docker-net">
+                    <mxGeometry x="810" y="340" width="170" height="100" as="geometry"/>
+                </mxCell>
+                <!-- Flecha User -> Users DB -->
+                <mxCell id="edge-user-db" value="Lectura/Escritura Exclusiva" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" edge="1" parent="docker-net" source="user-svc" target="users-db">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-19" edge="1" parent="1" source="bd_Pcx_Rlhs7LUIoi_rt-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=classic;endFill=1;" target="bd_Pcx_Rlhs7LUIoi_rt-16">
+                <!-- Flecha Checkout -> Inventory -->
+                <mxCell id="edge-checkout-inv" value="HTTP PUT /api/inventario/reducir&lt;br&gt;(Propaga Authorization: Bearer JWT)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;strokeWidth=2;dashed=1;" edge="1" parent="docker-net" source="checkout-svc" target="inventory-svc">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-20" edge="1" parent="1" source="bd_Pcx_Rlhs7LUIoi_rt-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=classic;endFill=1;" target="bd_Pcx_Rlhs7LUIoi_rt-17">
+                <!-- Flecha Inventory -> Redis -->
+                <mxCell id="edge-inv-redis" value="1. Adquiere y Libera Lock" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" edge="1" parent="docker-net" source="inventory-svc" target="inventory-redis">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-21" edge="1" parent="1" source="bd_Pcx_Rlhs7LUIoi_rt-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=classic;endFill=1;dashed=1;strokeWidth=2;" target="bd_Pcx_Rlhs7LUIoi_rt-13">
+                <!-- Flecha Inventory -> Inventory DB -->
+                <mxCell id="edge-inv-db" value="2. Descuenta Stock ($inc: -1)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" edge="1" parent="docker-net" source="inventory-svc" target="inventory-db">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="bd_Pcx_Rlhs7LUIoi_rt-22" connectable="0" parent="bd_Pcx_Rlhs7LUIoi_rt-21" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];backgroundColor=#ffffff;" value="HTTP REST&lt;br&gt;(Petición Descontar Stock)" vertex="1">
-                    <mxGeometry relative="1" x="0.2" as="geometry">
-                        <mxPoint x="-54" as="offset"/>
-                    </mxGeometry>
+                <!-- Flechas desde el Cliente -->
+                <mxCell id="edge-client-user" value="POST /auth/login (:3000)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" edge="1" parent="1" source="client-1" target="user-svc">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-client-checkout" value="POST /api/comprar (:3002)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" edge="1" parent="1" source="client-1" target="checkout-svc">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-client-inv" value="GET /api/inventario (:3001)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" edge="1" parent="1" source="client-1" target="inventory-svc">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
