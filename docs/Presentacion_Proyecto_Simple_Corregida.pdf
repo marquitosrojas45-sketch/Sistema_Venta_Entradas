@@ -1,0 +1,1077 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [7 0 R 9 0 R 11 0 R 13 0 R 15 0 R 17 0 R] /Count 6 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Length 2670 >>
+stream
+q
+1.00 w
+0.060 0.090 0.160 rg
+0.00 0.00 842.00 475.00 re f
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+0.00 0.00 12.00 475.00 re f
+Q
+q
+1.00 w
+0.120 0.230 0.540 rg
+0.380 0.650 0.980 RG
+48.00 401.00 390.00 26.00 re B
+Q
+q
+0.750 0.880 1.000 rg
+BT /F2 9.5 Tf 60.00 410.50 Td (UNIVERSIDAD CHAMPAGNAT - PROGRAMACI\323N DISTRIBUIDA) Tj ET
+Q
+q
+1.000 1.000 1.000 rg
+BT /F2 28.0 Tf 48.00 345.00 Td (Sistema Distribuido de Venta de Entradas) Tj ET
+Q
+q
+0.580 0.770 0.990 rg
+BT /F2 15.0 Tf 48.00 318.00 Td (Microservicios, Concurrencia con Redis, Docker y Seguridad JWT) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 12.0 Tf 48.00 281.00 Td (Sistema de compra de entradas dise\361ado en 3 microservicios independientes con Node.js,) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 12.0 Tf 48.00 263.00 Td (MongoDB, Redis, JWT y Docker Compose para evitar sobreventas ante m\372ltiples pedidos) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 12.0 Tf 48.00 245.00 Td (simult\341neos.) Tj ET
+Q
+q
+1.00 w
+0.100 0.150 0.260 rg
+0.230 0.510 0.960 RG
+48.00 78.00 240.00 145.00 re B
+Q
+q
+0.580 0.770 0.990 rg
+BT /F2 13.0 Tf 62.00 194.00 Td (User Service \(:3000\)) Tj ET
+Q
+q
+1.000 1.000 1.000 rg
+BT /F2 10.5 Tf 62.00 176.50 Td (Marcos) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 10.5 Tf 62.00 152.50 Td (- Registro y Login seguro) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 10.5 Tf 62.00 136.50 Td (- Hashing con Bcrypt) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 10.5 Tf 62.00 120.50 Td (- Emisi\363n de tokens JWT) Tj ET
+Q
+q
+1.00 w
+0.100 0.150 0.260 rg
+0.090 0.640 0.290 RG
+302.00 78.00 240.00 145.00 re B
+Q
+q
+0.530 0.940 0.670 rg
+BT /F2 13.0 Tf 316.00 194.00 Td (Inventory Service \(:3001\)) Tj ET
+Q
+q
+1.000 1.000 1.000 rg
+BT /F2 10.5 Tf 316.00 176.50 Td (Nahuel) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 10.5 Tf 316.00 152.50 Td (- Cat\341logo y control de stock) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 10.5 Tf 316.00 136.50 Td (- Lock distribuido en Redis) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 10.5 Tf 316.00 120.50 Td (- Base propia en MongoDB) Tj ET
+Q
+q
+1.00 w
+0.100 0.150 0.260 rg
+0.960 0.620 0.040 RG
+556.00 78.00 240.00 145.00 re B
+Q
+q
+0.990 0.830 0.300 rg
+BT /F2 13.0 Tf 570.00 194.00 Td (Checkout Service \(:3002\)) Tj ET
+Q
+q
+1.000 1.000 1.000 rg
+BT /F2 10.5 Tf 570.00 176.50 Td (Lisandro) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 10.5 Tf 570.00 152.50 Td (- Orquesta las compras) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 10.5 Tf 570.00 136.50 Td (- Propaga JWT hacia Inventory) Tj ET
+Q
+q
+0.820 0.870 0.930 rg
+BT /F1 10.5 Tf 570.00 120.50 Td (- Timeouts y pruebas E2E) Tj ET
+Q
+q
+0.580 0.640 0.720 rg
+BT /F1 10.0 Tf 48.00 35.00 Td (Stack: Node.js 20  |  Express  |  MongoDB 7  |  Redis 7  |  JWT  |  Docker Compose  |  Swagger  |  Winston) Tj ET
+Q
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 475] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 3805 >>
+stream
+q
+1.00 w
+0.060 0.090 0.160 rg
+0.00 421.00 842.00 54.00 re f
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+0.00 417.50 842.00 3.50 re f
+Q
+q
+1.000 1.000 1.000 rg
+BT /F2 18.0 Tf 30.00 440.00 Td (1. Problema que Resolvemos y Evoluci\363n \(TP1 a TP7\)) Tj ET
+Q
+q
+0.80 w
+0.120 0.250 0.680 rg
+0.380 0.650 0.980 RG
+736.00 436.00 76.00 24.00 re B
+Q
+q
+0.880 0.950 1.000 rg
+BT /F2 9.5 Tf 748.00 444.50 Td (OBJETIVO) Tj ET
+Q
+q
+1.00 w
+0.950 0.960 0.980 rg
+0.00 0.00 842.00 28.00 re f
+Q
+q
+0.390 0.450 0.550 rg
+BT /F1 9.0 Tf 30.00 10.00 Td (Sistema Distribuido de Venta de Entradas | Universidad Champagnat) Tj ET
+Q
+q
+0.150 0.390 0.920 rg
+BT /F2 9.0 Tf 732.00 10.00 Td (Diapositiva 2 / 6) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+30.00 283.00 782.00 118.00 re B
+Q
+q
+1.00 w
+0.860 0.150 0.150 rg
+30.00 283.00 5.00 118.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 45.00 376.00 Td (El Problema: Compras Simult\341neas sobre Stock Limitado) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.5 Tf 45.00 353.50 Td (- Cuando varias personas compran la \372ltima entrada al mismo tiempo, sin sincronizaci\363n se) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.5 Tf 45.00 338.50 Td (produce sobreventa \(stock negativo\).) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.5 Tf 45.00 317.50 Td (- Adem\341s, un sistema monol\355tico mezcla responsabilidades y si falla un m\363dulo puede caer toda la) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.5 Tf 45.00 302.50 Td (aplicaci\363n.) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+30.00 52.00 250.00 215.00 re B
+Q
+q
+1.00 w
+0.480 0.230 0.930 rg
+30.00 52.00 5.00 215.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 45.00 242.00 Td (Etapa 1: Base \(TP1 - TP3\)) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 220.00 Td (- API REST en Node.js y Express.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 199.00 Td (- Primer Lock en Redis para evitar) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 184.00 Td (condiciones de carrera.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 163.00 Td (- Persistencia en MongoDB, logs) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 148.00 Td (con Winston y Swagger.) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+296.00 52.00 250.00 215.00 re B
+Q
+q
+1.00 w
+0.090 0.640 0.290 rg
+296.00 52.00 5.00 215.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 311.00 242.00 Td (Etapa 2: Microservicios \(TP5-6\)) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 311.00 220.00 Td (- Divisi\363n en 3 servicios) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 311.00 205.00 Td (independientes \(User, Inventory,) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 311.00 190.00 Td (Checkout\).) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 311.00 169.00 Td (- Cada servicio corre en su) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 311.00 154.00 Td (contenedor Docker.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 311.00 133.00 Td (- Inventory encapsula el stock y) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 311.00 118.00 Td (su Lock en Redis.) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+562.00 52.00 250.00 215.00 re B
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+562.00 52.00 5.00 215.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 577.00 242.00 Td (Etapa 3: Seguridad \(TP7\)) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 577.00 220.00 Td (- Contrase\361as encriptadas con) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 577.00 205.00 Td (Bcrypt.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 577.00 184.00 Td (- Tokens JWT para autenticar sin) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 577.00 169.00 Td (estado.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 577.00 148.00 Td (- Permisos por rol \(USER y ADMIN\)) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 577.00 133.00 Td (y validaci\363n de propietario.) Tj ET
+Q
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 475] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 3851 >>
+stream
+q
+1.00 w
+0.060 0.090 0.160 rg
+0.00 421.00 842.00 54.00 re f
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+0.00 417.50 842.00 3.50 re f
+Q
+q
+1.000 1.000 1.000 rg
+BT /F2 18.0 Tf 30.00 440.00 Td (2. Arquitectura: 3 Microservicios y Bases Independientes) Tj ET
+Q
+q
+0.80 w
+0.120 0.250 0.680 rg
+0.380 0.650 0.980 RG
+710.00 436.00 102.00 24.00 re B
+Q
+q
+0.880 0.950 1.000 rg
+BT /F2 9.5 Tf 722.00 444.50 Td (ARQUITECTURA) Tj ET
+Q
+q
+1.00 w
+0.950 0.960 0.980 rg
+0.00 0.00 842.00 28.00 re f
+Q
+q
+0.390 0.450 0.550 rg
+BT /F1 9.0 Tf 30.00 10.00 Td (Sistema Distribuido de Venta de Entradas | Universidad Champagnat) Tj ET
+Q
+q
+0.150 0.390 0.920 rg
+BT /F2 9.0 Tf 732.00 10.00 Td (Diapositiva 3 / 6) Tj ET
+Q
+q
+1.00 w
+0.940 0.960 0.990 rg
+0.750 0.800 0.880 RG
+30.00 271.00 782.00 130.00 re B
+Q
+q
+0.150 0.390 0.920 rg
+BT /F2 11.0 Tf 46.00 380.00 Td (Flujo en Red Interna Docker \(backend-net\)) Tj ET
+Q
+q
+1.50 w
+1.000 1.000 1.000 rg
+0.150 0.390 0.920 RG
+46.00 285.00 198.00 82.00 re B
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 11.5 Tf 56.00 345.50 Td (user-service \(:3000\)) Tj ET
+Q
+q
+0.120 0.160 0.230 rg
+BT /F1 10.0 Tf 56.00 327.00 Td (Registro, Login y JWT) Tj ET
+Q
+q
+0.090 0.640 0.290 rg
+BT /F2 9.8 Tf 56.00 307.20 Td (BD: MongoDB \(users-db\)) Tj ET
+Q
+q
+1.50 w
+1.000 1.000 1.000 rg
+0.850 0.470 0.020 RG
+280.00 285.00 210.00 82.00 re B
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 11.5 Tf 292.00 345.50 Td (checkout-service \(:3002\)) Tj ET
+Q
+q
+0.120 0.160 0.230 rg
+BT /F1 10.0 Tf 292.00 327.00 Td (Recibe la compra \(Stateless\)) Tj ET
+Q
+q
+0.850 0.470 0.020 rg
+BT /F2 9.8 Tf 292.00 307.20 Td (Sin BD propia - Propaga JWT) Tj ET
+Q
+q
+0.150 0.390 0.920 rg
+BT /F2 9.5 Tf 500.00 335.50 Td (PUT /reducir) Tj ET
+Q
+q
+0.150 0.390 0.920 rg
+BT /F2 12.0 Tf 503.00 317.00 Td (---------->) Tj ET
+Q
+q
+1.50 w
+1.000 1.000 1.000 rg
+0.090 0.640 0.290 RG
+578.00 285.00 218.00 82.00 re B
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 11.5 Tf 590.00 345.50 Td (inventory-service \(:3001\)) Tj ET
+Q
+q
+0.120 0.160 0.230 rg
+BT /F1 10.0 Tf 590.00 327.00 Td (Stock + Lock Distribuido) Tj ET
+Q
+q
+0.860 0.150 0.150 rg
+BT /F2 9.8 Tf 590.00 307.20 Td (Redis + MongoDB \(inventory-db\)) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+30.00 51.00 382.00 204.00 re B
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+30.00 51.00 5.00 204.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 45.00 230.00 Td (Regla Clave: Cada Servicio es Due\361o de su Dato) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 208.00 Td (- User Service maneja \372nicamente usuarios en users-) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 193.00 Td (db.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 172.00 Td (- Inventory Service es el \372nico que accede a) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 157.00 Td (inventory-db y a Redis.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 136.00 Td (- Checkout Service no tiene base de datos: coordina) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 121.00 Td (el pedido y llama a Inventory por HTTP.) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+428.00 51.00 384.00 204.00 re B
+Q
+q
+1.00 w
+0.090 0.640 0.290 rg
+428.00 51.00 5.00 204.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 443.00 230.00 Td (Ventajas del Dise\361o Desacoplado) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 443.00 208.00 Td (- Si cae user-service, los clientes que ya tienen) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 443.00 193.00 Td (token JWT pueden seguir comprando normalmente.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 443.00 172.00 Td (- Checkout no necesita saber c\363mo se bloquea el) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 443.00 157.00 Td (stock: solo llama al endpoint de Inventory.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 443.00 136.00 Td (- Cada servicio se puede escalar o actualizar por) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 443.00 121.00 Td (separado.) Tj ET
+Q
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 475] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 3979 >>
+stream
+q
+1.00 w
+0.060 0.090 0.160 rg
+0.00 421.00 842.00 54.00 re f
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+0.00 417.50 842.00 3.50 re f
+Q
+q
+1.000 1.000 1.000 rg
+BT /F2 18.0 Tf 30.00 440.00 Td (3. Control de Concurrencia \(Redis\) y Fallos Parciales) Tj ET
+Q
+q
+0.80 w
+0.120 0.250 0.680 rg
+0.380 0.650 0.980 RG
+710.00 436.00 102.00 24.00 re B
+Q
+q
+0.880 0.950 1.000 rg
+BT /F2 9.5 Tf 722.00 444.50 Td (CONCURRENCIA) Tj ET
+Q
+q
+1.00 w
+0.950 0.960 0.980 rg
+0.00 0.00 842.00 28.00 re f
+Q
+q
+0.390 0.450 0.550 rg
+BT /F1 9.0 Tf 30.00 10.00 Td (Sistema Distribuido de Venta de Entradas | Universidad Champagnat) Tj ET
+Q
+q
+0.150 0.390 0.920 rg
+BT /F2 9.0 Tf 732.00 10.00 Td (Diapositiva 4 / 6) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+30.00 183.00 382.00 218.00 re B
+Q
+q
+1.00 w
+0.860 0.150 0.150 rg
+30.00 183.00 5.00 218.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 45.00 376.00 Td (C\363mo Evitamos la Sobreventa en Inventory Service) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 354.20 Td (1. Lock en Redis: Al llegar PUT) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 339.20 Td (/api/inventario/reducir, intenta crear una clave) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 324.20 Td (temporal por 5 segundos \(SET NX PX 5000\).) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 303.20 Td (2. Si otro usuario ya la tiene: Responde al instante) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 288.20 Td (409 Conflict sin tocar MongoDB.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 267.20 Td (3. Si obtuvo el lock: Descuenta 1 unidad en MongoDB) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 252.20 Td (validando stock > 0.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 231.20 Td (4. Al terminar \(finally\): Libera el lock con un) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 216.20 Td (Script Lua verificando su UUID.) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+428.00 183.00 384.00 218.00 re B
+Q
+q
+1.00 w
+0.850 0.470 0.020 rg
+428.00 183.00 5.00 218.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 443.00 376.00 Td (Manejo de Fallos Parciales en Checkout Service) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 354.20 Td (- Timeout de 3 segundos \(AbortController\): Si) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 339.20 Td (Inventory tarda o est\341 ca\355do, Checkout corta la) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 324.20 Td (espera.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 303.20 Td (- Respuesta controlada: Checkout nunca se cuelga;) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 288.20 Td (devuelve 503 Service Unavailable y registra el error) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 273.20 Td (en Winston.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 252.20 Td (- Soluci\363n ante cortes a mitad de camino: Uso de) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 237.20 Td (Idempotency-Key para reintentos seguros y patr\363n) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 222.20 Td (Saga para compensar.) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+30.00 51.00 782.00 118.00 re B
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+30.00 51.00 5.00 118.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 45.00 144.00 Td (Flujo At\363mico en inventory-service/index.js) Tj ET
+Q
+q
+1.00 w
+0.080 0.120 0.200 rg
+45.00 117.00 754.00 18.00 re f
+Q
+q
+0.560 0.820 0.990 rg
+BT /F3 9.5 Tf 51.00 121.50 Td (lock = await redisClient.set\(lockKey, ownerId, { NX: true, PX: 5000 }\); // Si es null -> 409 Conflict) Tj ET
+Q
+q
+1.00 w
+0.080 0.120 0.200 rg
+45.00 93.00 754.00 18.00 re f
+Q
+q
+0.560 0.820 0.990 rg
+BT /F3 9.5 Tf 51.00 97.50 Td (await Inventario.findOneAndUpdate\({ producto, stock: { $gt: 0 } }, { $inc: { stock: -1 } }\);) Tj ET
+Q
+q
+1.00 w
+0.080 0.120 0.200 rg
+45.00 69.00 754.00 18.00 re f
+Q
+q
+0.560 0.820 0.990 rg
+BT /F3 9.5 Tf 51.00 73.50 Td (// Finally -> Script Lua borra el lock solo si el valor coincide con ownerId) Tj ET
+Q
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 475] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 3602 >>
+stream
+q
+1.00 w
+0.060 0.090 0.160 rg
+0.00 421.00 842.00 54.00 re f
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+0.00 417.50 842.00 3.50 re f
+Q
+q
+1.000 1.000 1.000 rg
+BT /F2 18.0 Tf 30.00 440.00 Td (4. Seguridad \(JWT + RBAC\) e Infraestructura Docker) Tj ET
+Q
+q
+0.80 w
+0.120 0.250 0.680 rg
+0.380 0.650 0.980 RG
+671.00 436.00 141.00 24.00 re B
+Q
+q
+0.880 0.950 1.000 rg
+BT /F2 9.5 Tf 683.00 444.50 Td (SEGURIDAD & DOCKER) Tj ET
+Q
+q
+1.00 w
+0.950 0.960 0.980 rg
+0.00 0.00 842.00 28.00 re f
+Q
+q
+0.390 0.450 0.550 rg
+BT /F1 9.0 Tf 30.00 10.00 Td (Sistema Distribuido de Venta de Entradas | Universidad Champagnat) Tj ET
+Q
+q
+0.150 0.390 0.920 rg
+BT /F2 9.0 Tf 732.00 10.00 Td (Diapositiva 5 / 6) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+30.00 53.00 382.00 348.00 re B
+Q
+q
+1.00 w
+0.480 0.230 0.930 rg
+30.00 53.00 5.00 348.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 45.00 376.00 Td (Seguridad Aplicada \(TP7\)) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 354.20 Td (- Contrase\361as seguras: Guardadas con hash bcrypt \(10) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 339.20 Td (rondas\), nunca en texto plano.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 318.20 Td (- Tokens JWT \(HS256\): Emitidos al hacer login. Cada) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 303.20 Td (servicio verifica el token por su cuenta.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 282.20 Td (- Roles \(RBAC\):) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 261.20 Td (  * P\372blico: consultar cat\341logo \(/api/inventario\) y) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 246.20 Td (login/registro.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 225.20 Td (  * USER: comprar entradas y ver solo su propio) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 210.20 Td (perfil.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 189.20 Td (  * ADMIN: cargar o modificar stock, listar y borrar) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 174.20 Td (usuarios.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 153.20 Td (- Higiene del c\363digo: Sin claves ni certificados) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 138.20 Td (.pfx ni archivos de logs subidos a Git.) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+428.00 53.00 384.00 348.00 re B
+Q
+q
+1.00 w
+0.090 0.640 0.290 rg
+428.00 53.00 5.00 348.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 443.00 376.00 Td (Infraestructura en Docker Compose) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 354.20 Td (- 6 contenedores coordinados: 3 microservicios) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 339.20 Td (Node.js + 2 MongoDB + 1 Redis.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 318.20 Td (- Red privada backend-net: Solo se exponen los) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 303.20 Td (puertos 3000, 3001 y 3002; las bases de datos quedan) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 288.20 Td (ocultas.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 267.20 Td (- Vol\372menes persistentes: Los datos de MongoDB no se) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 252.20 Td (pierden al reiniciar contenedores.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 231.20 Td (- Healthchecks: Cada servicio espera a que su base) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 216.20 Td (de datos y Redis est\351n sanos antes de arrancar.) Tj ET
+Q
+q
+1.00 w
+0.080 0.120 0.200 rg
+443.00 190.00 356.00 18.00 re f
+Q
+q
+0.560 0.820 0.990 rg
+BT /F3 9.5 Tf 449.00 194.50 Td (docker compose up -d --build) Tj ET
+Q
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 475] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Length 3142 >>
+stream
+q
+1.00 w
+0.060 0.090 0.160 rg
+0.00 421.00 842.00 54.00 re f
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+0.00 417.50 842.00 3.50 re f
+Q
+q
+1.000 1.000 1.000 rg
+BT /F2 18.0 Tf 30.00 440.00 Td (5. Pruebas Automatizadas Reproducibles y Conclusiones) Tj ET
+Q
+q
+0.80 w
+0.120 0.250 0.680 rg
+0.380 0.650 0.980 RG
+742.50 436.00 69.50 24.00 re B
+Q
+q
+0.880 0.950 1.000 rg
+BT /F2 9.5 Tf 754.50 444.50 Td (PRUEBAS) Tj ET
+Q
+q
+1.00 w
+0.950 0.960 0.980 rg
+0.00 0.00 842.00 28.00 re f
+Q
+q
+0.390 0.450 0.550 rg
+BT /F1 9.0 Tf 30.00 10.00 Td (Sistema Distribuido de Venta de Entradas | Universidad Champagnat) Tj ET
+Q
+q
+0.150 0.390 0.920 rg
+BT /F2 9.0 Tf 732.00 10.00 Td (Diapositiva 6 / 6) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+30.00 219.00 782.00 182.00 re B
+Q
+q
+1.00 w
+0.090 0.640 0.290 rg
+30.00 219.00 5.00 182.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 45.00 376.00 Td (Qu\351 Valida Nuestra Suite Automatizada \(npm test\)) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 354.00 Td (1. Salud del sistema: Verifica que los 3 servicios, MongoDB y Redis respondan 200 OK.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 333.00 Td (2. Autenticaci\363n: Registra usuarios ADMIN y USER y valida la emisi\363n de tokens JWT.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 312.00 Td (3. Concurrencia real \(Promise.all\): Con stock = 1, dispara 2 compras simult\341neas; 1 gana \(200) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 297.00 Td (OK\), 1 falla \(409/400\) y el stock queda en 0.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 276.00 Td (4. Seguridad RBAC: Verifica rechazos 401 sin token y 403 si un USER intenta cargar stock o ver) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 11.0 Tf 45.00 261.00 Td (otro perfil.) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+30.00 45.00 382.00 160.00 re B
+Q
+q
+1.00 w
+0.150 0.390 0.920 rg
+30.00 45.00 5.00 160.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 45.00 180.00 Td (Comandos para Ejecutar) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 158.20 Td (1. Levantar todo el entorno:) Tj ET
+Q
+q
+1.00 w
+0.080 0.120 0.200 rg
+45.00 132.00 354.00 18.00 re f
+Q
+q
+0.560 0.820 0.990 rg
+BT /F3 9.5 Tf 51.00 136.50 Td (docker compose up -d --build) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 45.00 113.20 Td (2. Correr las 16 pruebas de punta a punta:) Tj ET
+Q
+q
+1.00 w
+0.080 0.120 0.200 rg
+45.00 87.00 354.00 18.00 re f
+Q
+q
+0.560 0.820 0.990 rg
+BT /F3 9.5 Tf 51.00 91.50 Td (npm test) Tj ET
+Q
+q
+0.90 w
+0.970 0.980 0.990 rg
+0.850 0.890 0.940 RG
+428.00 45.00 384.00 160.00 re B
+Q
+q
+1.00 w
+0.480 0.230 0.930 rg
+428.00 45.00 5.00 160.00 re f
+Q
+q
+0.060 0.090 0.160 rg
+BT /F2 13.0 Tf 443.00 180.00 Td (Resumen Final del Proyecto) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 158.20 Td (- Arquitectura limpia en 3 microservicios.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 137.20 Td (- Cero sobreventas \(Lock Redis en Inventory\).) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 116.20 Td (- Seguridad stateless con JWT, Bcrypt y RBAC.) Tj ET
+Q
+q
+0.180 0.230 0.310 rg
+BT /F1 10.8 Tf 443.00 95.20 Td (- 100% reproducible con Docker y tests.) Tj ET
+Q
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 475] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 16 0 R >>
+endobj
+xref
+0 18
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000155 00000 n 
+0000000252 00000 n 
+0000000354 00000 n 
+0000000449 00000 n 
+0000003171 00000 n 
+0000003317 00000 n 
+0000007174 00000 n 
+0000007320 00000 n 
+0000011224 00000 n 
+0000011372 00000 n 
+0000015404 00000 n 
+0000015552 00000 n 
+0000019207 00000 n 
+0000019355 00000 n 
+0000022550 00000 n 
+trailer
+<< /Size 18 /Root 1 0 R >>
+startxref
+22698
+%%EOF
