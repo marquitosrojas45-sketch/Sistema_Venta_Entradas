@@ -143,7 +143,7 @@ docker compose down -v
 
 ---
 
-## 2. Algoritmo de Consenso RAFT y su Aplicación en el Proyecto
+## 2. Algoritmo de Consenso RAFT (Tema Teórico del TP4 — No incluido en el código del proyecto)
 
 ### 2.1. ¿Qué es el algoritmo de consenso RAFT?
 En un sistema distribuido sin memoria compartida ni reloj global, cuando tenemos múltiples nodos replicados necesitamos que todos se pongan de acuerdo sobre el valor de un dato o el orden de las transacciones incluso si algunos nodos fallan (*Tolerancia a Fallos por Caída / Crash Fault Tolerance*). **RAFT** es un algoritmo de consenso distribuido diseñado como alternativa comprensible a Paxos.
@@ -159,24 +159,17 @@ En RAFT, todo nodo se encuentra en uno de **3 estados**:
 
 ---
 
-### 2.2. ¿Cómo aplicamos RAFT en nuestro proyecto?
-En nuestro proyecto, los conceptos de coordinación y consenso con RAFT intervienen en tres niveles clave de la arquitectura:
+### 2.2. ¿Se incluye RAFT en el código de nuestro proyecto (TP5, TP6 o TP7)?
+**No.** El **TP4 (Consenso RAFT)** fue un trabajo práctico independiente y **no se incluye en el código del proyecto integrador** (el proyecto evoluciona del TP1 $\rightarrow$ TP2 $\rightarrow$ TP3 $\rightarrow$ TP5 $\rightarrow$ TP6 $\rightarrow$ TP7). En ninguno de los prácticos TP5, TP6 ni TP7 se pide implementar RAFT:
+* **TP5:** Separación arquitectónica en 3 microservicios (`User`, `Inventory`, `Checkout`), responsabilidades, acoplamiento y cohesión.
+* **TP6:** Docker, Docker Compose, red interna, volúmenes, *healthchecks*, encapsulación del Lock de Redis en `inventory-service` y manejo de fallos parciales.
+* **TP7:** Seguridad con `bcrypt`, autenticación *stateless* con `JWT (HS256)`, propagación de token y autorización por roles (`RBAC`).
 
-1. **Capa de Persistencia con MongoDB Replica Sets (Consenso tipo RAFT):**
-   Cada uno de nuestros tres microservicios (`user-service`, `inventory-service` y `checkout-service`) persiste su estado en MongoDB. El motor de replicación nativo de MongoDB (*Replica Set*) utiliza un protocolo de consenso basado directamente en **RAFT**:
-   * Existe un único nodo **Primary (Líder)** que recibe las escrituras (por ejemplo, el descuento atómico de stock `findOneAndUpdate` en `inventory-service` o la creación de órdenes en `checkout-service`) y las registra en su bitácora de operaciones (*Oplog*).
-   * Los nodos **Secondary (Seguidores)** replican asincrónica o sincrónicamente ese *Oplog*.
-   * Si el nodo Primary cae, los nodos Secondary detectan la falta de *heartbeats* (por defecto a los 10 segundos en Mongo) y ejecutan una **elección por mayoría (RAFT)** para promover automáticamente un nuevo Primary sin pérdida de datos.
-
-2. **Coordinación de Exclusión Mutua Distribuida (De Nodo Único Redis a Consenso Distribuido):**
-   En `inventory-service` implementamos un **Lock Distribuido en Redis** (`SET lock:stock:{id} {ownerId} NX PX 5000` + liberación atómica con Script Lua) para serializar el acceso al stock.
-   * Con una única instancia de Redis (`inventory-redis`), Redis actúa como coordinador centralizado rápido en memoria.
-   * Si escalamos ese coordinador para eliminar el punto único de fallo (*Single Point of Failure*), se utiliza **Redlock** (quórum sobre $N=5$ nodos Redis independientes donde el cliente debe adquirir el lock en al menos 3 de 5 nodos en un tiempo menor al TTL) o bien un coordinador de locks basado estrictamente en **RAFT** como **etcd** o **HashiCorp Consul**, donde la adquisición del lock `lock:stock:{id}` se persiste mediante el log replicado de RAFT antes de otorgar el permiso al microservicio.
-
-3. **Plano de Control y Orquestación de Contenedores (Docker Swarm / Kubernetes):**
-   Al llevar nuestros contenedores definidos en `docker-compose.yml` a un clúster de varios servidores físicos:
-   * **Docker Swarm** utiliza internamente **RAFT** entre sus nodos *Manager* para mantener el estado deseado del clúster (qué contenedores deben correr, redes overlay y secretos).
-   * **Kubernetes (K8s)** almacena todo el estado del clúster en **etcd**, una base de datos clave-valor distribuida que implementa **RAFT** puro. Si un contenedor de `inventory-service` muere, el consenso RAFT de `etcd` permite que el Control Plane programe un nuevo contenedor en otro nodo sano.
+**¿Qué responder si en la defensa oral nos preguntan cómo se relaciona RAFT con nuestra arquitectura o qué usamos en su lugar?**
+1. **En nuestro código actual (TP2 / TP6):** Para coordinar la concurrencia del stock no usamos consenso RAFT, sino un **coordinador centralizado en memoria (Redis)** mediante un **Lock Distribuido (`SET lock:producto:... NX PX 5000` + Script Lua)** encapsulado dentro de `inventory-service`.
+2. **Dónde aparece RAFT en herramientas de infraestructura real (conexión teórica):**
+   * Si en producción configuráramos **MongoDB como un Replica Set** (varios nodos de base de datos), el motor interno de MongoDB sí utiliza un protocolo basado en **RAFT** para elegir automáticamente un nuevo nodo *Primary (Líder)* si el principal se cae.
+   * Del mismo modo, orquestadores de contenedores en clúster como **Docker Swarm** o **Kubernetes (`etcd`)** usan **RAFT** internamente para mantener el estado de los contenedores entre varios servidores.
 
 ---
 
