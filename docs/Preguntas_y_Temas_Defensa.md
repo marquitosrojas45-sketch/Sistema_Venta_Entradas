@@ -88,7 +88,7 @@ Una **Imagen** es el molde o plantilla inmutable de solo lectura que define qué
 * `docker compose down`: Detiene y elimina los contenedores y la red virtual, pero **conserva los volúmenes de datos intactos** (`users_mongo_data` e `inventory_mongo_data`). Al volver a levantar con `docker compose up -d`, los usuarios y el stock siguen estando.
 * `docker compose down -v`: Detiene los contenedores y **elimina también los volúmenes persistentes (`-v`)**, borrando todas las bases de datos de MongoDB para reiniciar el laboratorio desde cero.
 
----
+--- 
 
 ### Pregunta 6: ¿Por qué en `docker-compose.yml` usamos nombres de servicio como `http://inventory-service:3001` y no `localhost`?
 > **Conceptos clave:** *Network Namespace* de Docker y resolución DNS interna.

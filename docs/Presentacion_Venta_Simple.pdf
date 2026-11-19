@@ -4,7 +4,7 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [7 0 R 9 0 R 11 0 R 13 0 R 15 0 R] /Count 5 >>
+<< /Type /Pages /Kids [7 0 R 9 0 R 11 0 R 13 0 R] /Count 4 >>
 endobj
 3 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
@@ -129,7 +129,7 @@ BT /F1 9.5 Tf 36.00 10.50 Td (Sistema de Venta de Entradas) Tj ET
 Q
 q
 0.150 0.390 0.920 rg
-BT /F2 10.0 Tf 772.00 10.00 Td (2 / 5) Tj ET
+BT /F2 10.0 Tf 772.00 10.00 Td (2 / 4) Tj ET
 Q
 q
 0.250 0.310 0.400 rg
@@ -296,7 +296,7 @@ BT /F1 9.5 Tf 36.00 10.50 Td (Sistema de Venta de Entradas) Tj ET
 Q
 q
 0.150 0.390 0.920 rg
-BT /F2 10.0 Tf 772.00 10.00 Td (3 / 5) Tj ET
+BT /F2 10.0 Tf 772.00 10.00 Td (3 / 4) Tj ET
 Q
 q
 0.250 0.310 0.400 rg
@@ -463,7 +463,7 @@ BT /F1 9.5 Tf 36.00 10.50 Td (Sistema de Venta de Entradas) Tj ET
 Q
 q
 0.150 0.390 0.920 rg
-BT /F2 10.0 Tf 772.00 10.00 Td (4 / 5) Tj ET
+BT /F2 10.0 Tf 772.00 10.00 Td (4 / 4) Tj ET
 Q
 q
 1.20 w
@@ -578,94 +578,24 @@ endobj
 13 0 obj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 842 475] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 12 0 R >>
 endobj
-14 0 obj
-<< /Length 1204 >>
-stream
-q
-1.00 w
-0.060 0.090 0.160 rg
-0.00 0.00 842.00 475.00 re f
-Q
-q
-1.00 w
-0.090 0.640 0.290 rg
-0.00 0.00 14.00 475.00 re f
-Q
-q
-1.000 1.000 1.000 rg
-BT /F2 34.0 Tf 60.00 366.00 Td (Demostraci\363n en Vivo) Tj ET
-Q
-q
-0.580 0.770 0.990 rg
-BT /F1 16.0 Tf 60.00 337.00 Td (Lo que vamos a ver funcionando ahora mismo:) Tj ET
-Q
-q
-1.20 w
-0.100 0.150 0.260 rg
-0.230 0.510 0.960 RG
-60.00 232.00 722.00 68.00 re B
-Q
-q
-0.580 0.770 0.990 rg
-BT /F2 16.0 Tf 84.00 264.00 Td (1. Registro y Acceso Seguro) Tj ET
-Q
-q
-0.900 0.940 0.980 rg
-BT /F1 13.5 Tf 355.00 264.50 Td (Creaci\363n de cuentas de cliente y organizador.) Tj ET
-Q
-q
-1.20 w
-0.100 0.150 0.260 rg
-0.090 0.640 0.290 RG
-60.00 147.00 722.00 68.00 re B
-Q
-q
-0.530 0.940 0.670 rg
-BT /F2 16.0 Tf 84.00 179.00 Td (2. Prueba Real Anti-Sobreventa) Tj ET
-Q
-q
-0.900 0.940 0.980 rg
-BT /F1 13.5 Tf 355.00 179.50 Td (Dos compras al mismo instante por la \372ltima entrada disponible.) Tj ET
-Q
-q
-1.20 w
-0.100 0.150 0.260 rg
-0.960 0.620 0.040 RG
-60.00 62.00 722.00 68.00 re B
-Q
-q
-0.990 0.830 0.300 rg
-BT /F2 16.0 Tf 84.00 94.00 Td (3. Protecci\363n ante Intrusos) Tj ET
-Q
-q
-0.900 0.940 0.980 rg
-BT /F1 13.5 Tf 355.00 94.50 Td (Bloqueo autom\341tico de accesos sin permiso.) Tj ET
-Q
-endstream
-endobj
-15 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 475] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 14 0 R >>
-endobj
 xref
-0 16
+0 14
 0000000000 65535 f 
 0000000015 00000 n 
 0000000064 00000 n 
-0000000148 00000 n 
-0000000245 00000 n 
-0000000347 00000 n 
-0000000442 00000 n 
-0000001946 00000 n 
-0000002092 00000 n 
-0000005033 00000 n 
-0000005179 00000 n 
-0000008095 00000 n 
-0000008243 00000 n 
-0000010939 00000 n 
-0000011087 00000 n 
-0000012344 00000 n 
+0000000141 00000 n 
+0000000238 00000 n 
+0000000340 00000 n 
+0000000435 00000 n 
+0000001939 00000 n 
+0000002085 00000 n 
+0000005026 00000 n 
+0000005172 00000 n 
+0000008088 00000 n 
+0000008236 00000 n 
+0000010932 00000 n 
 trailer
-<< /Size 16 /Root 1 0 R >>
+<< /Size 14 /Root 1 0 R >>
 startxref
-12492
+11080
 %%EOF
